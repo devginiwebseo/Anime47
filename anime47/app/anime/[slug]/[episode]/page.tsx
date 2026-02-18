@@ -10,22 +10,23 @@ import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
 interface WatchPageProps {
-    params: {
+    params: Promise<{
         slug: string;
         episode: string;
-    };
+    }>;
 }
 
 export default async function WatchPage({ params }: WatchPageProps) {
+    const { slug, episode } = await params;
     // Extract episode number from params (e.g., "tap-2" -> 2)
-    const episodeNumber = parseInt(params.episode.replace('tap-', ''));
+    const episodeNumber = parseInt(episode.replace('tap-', ''));
 
     if (isNaN(episodeNumber) || episodeNumber < 1) {
         notFound();
     }
 
     // Fetch anime data from database
-    const story = await storyService.getStoryBySlug(params.slug);
+    const story = await storyService.getStoryBySlug(slug);
 
     if (!story) {
         notFound();

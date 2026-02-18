@@ -40,7 +40,7 @@ export class RatingService {
     // Cập nhật rating vào bảng story
     private async updateStoryRating(storyId: string, rating: number) {
         const { prisma } = await import('@/lib/prisma');
-        return prisma.story.update({
+        return prisma.stories.update({
             where: { id: storyId },
             data: { rating: Number(rating.toFixed(1)) },
         });

@@ -20,7 +20,7 @@ export default function MainLayoutWrapper({ children }: MainLayoutWrapperProps) 
     return (
         <div className="min-h-screen flex flex-col bg-gradient-to-b from-gray-900 via-black to-gray-900">
             <Header />
-            <main className="flex-1 w-full p-0">{children}</main>
+            <main className="flex-1 w-full p-0 container mx-auto">{children}</main>
             <Footer />
         </div>
     );

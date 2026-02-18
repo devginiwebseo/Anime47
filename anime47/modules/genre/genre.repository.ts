@@ -4,14 +4,14 @@ import { IGenre } from '@/types/common.types'
 
 class GenreRepository {
   async findBySlug(slug: string) {
-    return prisma.genre.findUnique({
+    return prisma.genres.findUnique({
       where: { slug },
     })
   }
 
   async upsert(data: IGenre) {
     try {
-      const genre = await prisma.genre.upsert({
+      const genre = await prisma.genres.upsert({
         where: { slug: data.slug },
         create: data,
         update: {

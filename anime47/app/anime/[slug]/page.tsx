@@ -13,9 +13,10 @@ import { genreService } from '@/modules/genre/genre.service';
 import { commentService } from '@/modules/comment/comment.service';
 import { ratingService } from '@/modules/rating/rating.service';
 
-export default async function AnimeDetailPage({ params }: { params: { slug: string } }) {
+export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+    const { slug } = await params;
     // Fetch story data from database
-    const story = await storyService.getStoryBySlug(params.slug);
+    const story = await storyService.getStoryBySlug(slug);
 
     if (!story) {
         notFound();

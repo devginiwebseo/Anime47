@@ -177,7 +177,7 @@ class StoryService {
           const { chapterService } = await import('../chapter/chapter.service')
           const m3u8Url = await chapterService.extractVideoUrl(ep.url)
 
-          await prisma.chapter.upsert({
+          await prisma.chapters.upsert({
             where: {
               storyId_slug: {
                 storyId: story.id,
@@ -249,13 +249,13 @@ class StoryService {
    * Lấy story theo ID
    */
   async getStoryById(id: string) {
-    return prisma.story.findUnique({
+    return prisma.stories.findUnique({
       where: { id },
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -266,14 +266,14 @@ class StoryService {
    * Lấy danh sách stories mới nhất
    */
   async getLatestStories(limit: number = 20) {
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -284,17 +284,17 @@ class StoryService {
    * Lấy danh sách stories hot (theo views hoặc rating)
    */
   async getHotStories(limit: number = 10) {
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       take: limit,
       orderBy: [
         { views: 'desc' },
         { rating: 'desc' },
       ],
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -304,7 +304,7 @@ class StoryService {
    * Lấy danh sách stories sắp chiếu
    */
   async getUpcomingStories(limit: number = 8) {
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       where: {
         OR: [
           { status: { contains: 'upcoming', mode: 'insensitive' } },
@@ -315,10 +315,10 @@ class StoryService {
       take: limit,
       orderBy: { createdAt: 'desc' },
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -330,14 +330,14 @@ class StoryService {
    */
   async getRelatedStories(storyId: string, limit: number = 6) {
     // Lấy genres của story hiện tại
-    const storyGenres = await prisma.storyGenre.findMany({
+    const storyGenres = await prisma.story_genres.findMany({
       where: { storyId },
       select: { genreId: true },
     })
 
     if (storyGenres.length === 0) {
       // Nếu không có genres, trả về stories mới nhất (loại trừ story hiện tại)
-      return prisma.story.findMany({
+      return prisma.stories.findMany({
         where: { id: { not: storyId } },
         take: limit,
         orderBy: { createdAt: 'desc' },
@@ -347,10 +347,10 @@ class StoryService {
     const genreIds = storyGenres.map(sg => sg.genreId)
 
     // Tìm stories có cùng genres
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       where: {
         id: { not: storyId },
-        genres: {
+        story_genres: {
           some: {
             genreId: { in: genreIds },
           },
@@ -383,7 +383,7 @@ class StoryService {
       dateFilter.setHours(0, 0, 0, 0)
     }
 
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       where: dateFilter ? {
         updatedAt: { gte: dateFilter },
         rating: { not: null },

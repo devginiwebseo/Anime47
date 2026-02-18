@@ -66,7 +66,7 @@ class ChapterService {
    * Lấy tất cả chapters của một story
    */
   async getChaptersByStoryId(storyId: string) {
-    return prisma.chapter.findMany({
+    return prisma.chapters.findMany({
       where: { storyId },
       orderBy: { index: 'asc' },
     })
@@ -76,7 +76,7 @@ class ChapterService {
    * Lấy chapter theo storyId và index
    */
   async getChapterByIndex(storyId: string, index: number) {
-    return prisma.chapter.findUnique({
+    return prisma.chapters.findUnique({
       where: {
         storyId_index: {
           storyId,
@@ -90,7 +90,7 @@ class ChapterService {
    * Đếm số chapters của một story
    */
   async countChapters(storyId: string): Promise<number> {
-    return prisma.chapter.count({
+    return prisma.chapters.count({
       where: { storyId },
     })
   }
@@ -99,7 +99,7 @@ class ChapterService {
    * Lấy chapter mới nhất của story
    */
   async getLatestChapter(storyId: string) {
-    return prisma.chapter.findFirst({
+    return prisma.chapters.findFirst({
       where: { storyId },
       orderBy: { index: 'desc' },
     })

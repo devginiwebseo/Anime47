@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 export class RatingRepository {
     // Lấy tất cả ratings của một story
     async findByStoryId(storyId: string) {
-        return prisma.rating.findMany({
+        return prisma.ratings.findMany({
             where: { storyId },
             orderBy: { createdAt: 'desc' },
         });
@@ -11,7 +11,7 @@ export class RatingRepository {
 
     // Lấy rating của user (theo IP) cho một story
     async findByStoryAndIp(storyId: string, userIp: string) {
-        return prisma.rating.findUnique({
+        return prisma.ratings.findUnique({
             where: {
                 storyId_userIp: {
                     storyId,
@@ -23,7 +23,7 @@ export class RatingRepository {
 
     // Tạo hoặc update rating
     async upsert(storyId: string, userIp: string, score: number) {
-        return prisma.rating.upsert({
+        return prisma.ratings.upsert({
             where: {
                 storyId_userIp: {
                     storyId,
@@ -44,7 +44,7 @@ export class RatingRepository {
 
     // Tính rating trung bình của một story
     async calculateAverageRating(storyId: string): Promise<number | null> {
-        const result = await prisma.rating.aggregate({
+        const result = await prisma.ratings.aggregate({
             where: { storyId },
             _avg: { score: true },
             _count: true,
@@ -55,14 +55,14 @@ export class RatingRepository {
 
     // Đếm số lượng ratings của một story
     async countByStoryId(storyId: string): Promise<number> {
-        return prisma.rating.count({
+        return prisma.ratings.count({
             where: { storyId },
         });
     }
 
     // Xóa rating
     async delete(id: string) {
-        return prisma.rating.delete({
+        return prisma.ratings.delete({
             where: { id },
         });
     }

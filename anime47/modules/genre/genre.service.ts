@@ -76,21 +76,21 @@ class GenreService {
    * Lấy danh sách genres của một story
    */
   async getGenresByStoryId(storyId: string) {
-    const storyGenres = await prisma.storyGenre.findMany({
+    const storyGenres = await prisma.story_genres.findMany({
       where: { storyId },
       include: {
-        genre: true,
+        genres: true,
       },
     });
 
-    return storyGenres.map(sg => sg.genre);
+    return storyGenres.map(sg => sg.genres);
   }
 
   /**
    * Lấy tất cả genres
    */
   async getAllGenres() {
-    return prisma.genre.findMany({
+    return prisma.genres.findMany({
       orderBy: { name: 'asc' },
     });
   }

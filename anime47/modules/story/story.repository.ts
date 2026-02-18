@@ -7,13 +7,13 @@ class StoryRepository {
    * Tìm story theo slug
    */
   async findBySlug(slug: string) {
-    return prisma.story.findUnique({
+    return prisma.stories.findUnique({
       where: { slug },
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -25,7 +25,7 @@ class StoryRepository {
    */
   async upsert(data: IStory) {
     try {
-      const story = await prisma.story.upsert({
+      const story = await prisma.stories.upsert({
         where: { slug: data.slug },
         create: {
           title: data.title,
@@ -78,12 +78,12 @@ class StoryRepository {
       // Update genres (many-to-many)
       if (data.genreIds && data.genreIds.length > 0) {
         // Delete old relations
-        await prisma.storyGenre.deleteMany({
+        await prisma.story_genres.deleteMany({
           where: { storyId: story.id },
         })
 
         // Create new relations
-        await prisma.storyGenre.createMany({
+        await prisma.story_genres.createMany({
           data: data.genreIds.map(genreId => ({
             storyId: story.id,
             genreId,
@@ -107,14 +107,14 @@ class StoryRepository {
   async findAll(page = 1, limit = 20) {
     const skip = (page - 1) * limit
     
-    return prisma.story.findMany({
+    return prisma.stories.findMany({
       skip,
       take: limit,
       include: {
-        author: true,
-        genres: {
+        authors: true,
+        story_genres: {
           include: {
-            genre: true,
+            genres: true,
           },
         },
       },
@@ -128,7 +128,7 @@ class StoryRepository {
    * Count stories
    */
   async count() {
-    return prisma.story.count()
+    return prisma.stories.count()
   }
 }
 

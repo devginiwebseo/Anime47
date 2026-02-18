@@ -1,0 +1,329 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model accounts {
+  id                String  @id
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  users             users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model actors {
+  id           String         @id
+  name         String
+  slug         String         @unique
+  bio          String?
+  avatarUrl    String?
+  sourceUrl    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  story_actors story_actors[]
+
+  @@index([slug])
+}
+
+model authors {
+  id        String    @id
+  name      String
+  slug      String    @unique
+  bio       String?
+  avatarUrl String?
+  sourceUrl String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime
+  stories   stories[]
+
+  @@index([slug])
+}
+
+model chapters {
+  id               String             @id
+  storyId          String
+  title            String
+  slug             String
+  content          String?
+  videoUrl         String?
+  index            Int
+  views            Int                @default(0)
+  sourceUrl        String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  metaJson         Json?
+  filePath         String?
+  wordCount        Int                @default(0)
+  stories          stories            @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  reading_progress reading_progress[]
+
+  @@unique([storyId, index])
+  @@unique([storyId, slug])
+  @@index([slug])
+  @@index([storyId])
+}
+
+model comments {
+  id        String   @id
+  storyId   String
+  author    String
+  content   String
+  userIp    String?
+  rating    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    String?
+  stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  users     users?   @relation(fields: [userId], references: [id])
+
+  @@index([createdAt])
+  @@index([storyId])
+}
+
+model crawl_logs {
+  id        String   @id
+  url       String
+  type      String
+  status    String
+  message   String?
+  error     String?
+  createdAt DateTime @default(now())
+
+  @@index([status])
+  @@index([type])
+}
+
+model error_reports {
+  id        String   @id
+  url       String?
+  message   String
+  stack     String?
+  status    String   @default("OPEN")
+  userId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  users     users?   @relation(fields: [userId], references: [id])
+}
+
+model favorites {
+  id        String   @id
+  userId    String
+  storyId   String
+  createdAt DateTime @default(now())
+  stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@index([userId])
+}
+
+model genres {
+  id           String         @id
+  name         String
+  slug         String         @unique
+  description  String?
+  sourceUrl    String?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime
+  story_genres story_genres[]
+
+  @@index([slug])
+}
+
+model media {
+  id        String   @id
+  storyId   String?
+  type      String
+  url       String
+  alt       String?
+  width     Int?
+  height    Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  stories   stories? @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@index([storyId])
+  @@index([type])
+}
+
+model pages {
+  id              String   @id
+  title           String
+  slug            String   @unique
+  content         String
+  isPublished     Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime
+  metaDescription String?
+  metaTitle       String?
+}
+
+model ratings {
+  id        String   @id
+  storyId   String
+  userIp    String
+  score     Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  userId    String?
+  stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, userIp])
+  @@index([storyId])
+}
+
+model reading_progress {
+  id         String    @id
+  userId     String
+  storyId    String
+  chapterId  String?
+  lastReadAt DateTime  @default(now())
+  chapters   chapters? @relation(fields: [chapterId], references: [id])
+  stories    stories   @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  users      users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, storyId])
+  @@index([userId])
+}
+
+model sessions {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  users        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model settings {
+  id        String   @id
+  key       String   @unique
+  value     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+}
+
+model stories {
+  id               String             @id
+  title            String
+  slug             String             @unique
+  description      String?
+  coverImage       String?
+  thumbnail        String?
+  status           String?
+  views            Int                @default(0)
+  rating           Float?
+  sourceUrl        String?
+  authorId         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  alternativeName  String?
+  cast             String?
+  director         String?
+  duration         String?
+  language         String?
+  quality          String?
+  releaseYear      Int?
+  metaJson         Json?
+  keywords         String?
+  chapters         chapters[]
+  comments         comments[]
+  favorites        favorites[]
+  media            media[]
+  ratings          ratings[]
+  reading_progress reading_progress[]
+  authors          authors?           @relation(fields: [authorId], references: [id])
+  story_actors     story_actors[]
+  story_genres     story_genres[]
+  story_tags       story_tags[]
+
+  @@index([authorId])
+  @@index([createdAt])
+  @@index([slug])
+}
+
+model story_actors {
+  id      String  @id
+  storyId String
+  actorId String
+  actors  actors  @relation(fields: [actorId], references: [id], onDelete: Cascade)
+  stories stories @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, actorId])
+  @@index([actorId])
+  @@index([storyId])
+}
+
+model story_genres {
+  id      String  @id
+  storyId String
+  genreId String
+  genres  genres  @relation(fields: [genreId], references: [id], onDelete: Cascade)
+  stories stories @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, genreId])
+  @@index([genreId])
+  @@index([storyId])
+}
+
+model story_tags {
+  id      String  @id
+  storyId String
+  tagId   String
+  stories stories @relation(fields: [storyId], references: [id], onDelete: Cascade)
+  tags    tags    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, tagId])
+  @@index([storyId])
+  @@index([tagId])
+}
+
+model tags {
+  id          String       @id
+  name        String
+  slug        String       @unique
+  description String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime
+  story_tags  story_tags[]
+}
+
+model users {
+  id               String             @id
+  name             String?
+  email            String?            @unique
+  emailVerified    DateTime?
+  image            String?
+  role             String             @default("USER")
+  password         String?
+  createdAt        DateTime           @default(now())
+  updatedAt        DateTime
+  accounts         accounts[]
+  comments         comments[]
+  error_reports    error_reports[]
+  favorites        favorites[]
+  reading_progress reading_progress[]
+  sessions         sessions[]
+}
+
+model verification_tokens {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

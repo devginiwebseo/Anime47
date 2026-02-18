@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 export class CommentRepository {
     // Lấy comments của một story
     async findByStoryId(storyId: string, limit: number = 50) {
-        return prisma.comment.findMany({
+        return prisma.comments.findMany({
             where: { storyId },
             orderBy: { createdAt: 'desc' },
             take: limit,
@@ -18,21 +18,21 @@ export class CommentRepository {
         userIp: string;
         rating?: number;
     }) {
-        return prisma.comment.create({
+        return prisma.comments.create({
             data,
         });
     }
 
     // Đếm số comments của story
     async countByStoryId(storyId: string): Promise<number> {
-        return prisma.comment.count({
+        return prisma.comments.count({
             where: { storyId },
         });
     }
 
     // Xóa comment
     async delete(id: string) {
-        return prisma.comment.delete({
+        return prisma.comments.delete({
             where: { id },
         });
     }
