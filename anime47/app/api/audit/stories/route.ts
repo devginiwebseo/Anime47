@@ -13,7 +13,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
     
     // Get random stories to audit
-    const stories = await prisma.story.findMany({
+    const stories = await prisma.stories.findMany({
       take: limit,
       orderBy: { createdAt: 'desc' },
     })

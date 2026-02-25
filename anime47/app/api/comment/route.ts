@@ -4,7 +4,7 @@ import { commentService } from '@/modules/comment/comment.service';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { storyId, author, content, rating } = body;
+        const { storyId, author, email, content, rating } = body;
 
         if (!storyId || !author || !content) {
             return NextResponse.json(
@@ -21,6 +21,7 @@ export async function POST(request: NextRequest) {
         const comment = await commentService.addComment({
             storyId,
             author: author.trim(),
+            email: email ? email.trim() : undefined,
             content: content.trim(),
             userIp,
             rating: rating || undefined,
@@ -52,9 +53,18 @@ export async function GET(request: NextRequest) {
             );
         }
 
+        const userIp = request.headers.get('x-forwarded-for') || 
+                      request.headers.get('x-real-ip') || 
+                      'unknown';
+        
+        const pendingIdsStr = searchParams.get('pendingIds');
+        const pendingIds = pendingIdsStr ? pendingIdsStr.split(',') : [];
+
         const comments = await commentService.getStoryComments(
             storyId,
-            limit ? parseInt(limit) : undefined
+            limit ? parseInt(limit) : undefined,
+            userIp,
+            pendingIds
         );
 
         return NextResponse.json(comments);

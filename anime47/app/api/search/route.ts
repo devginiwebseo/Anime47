@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json([]);
         }
 
-        const stories = await prisma.story.findMany({
+        const stories = await prisma.stories.findMany({
             where: {
                 OR: [
                     { title: { contains: query, mode: 'insensitive' } },

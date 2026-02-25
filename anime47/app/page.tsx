@@ -4,28 +4,33 @@ import RecommendedSection from '@/components/home/RecommendedSection';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
 
-export default function Home() {
+import { Suspense } from 'react';
+
+export default async function Home() {
     return (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-            {/* Main Content - 8 columns on large screens */}
             <div className="lg:col-span-8 space-y-8">
-                {/* Mới Cập Nhật */}
-                <NewReleasesSection />
+                <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
+                    <NewReleasesSection />
+                </Suspense>
 
-                {/* Sắp Chiếu */}
-                <ComingSoonSection />
+                <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
+                    <ComingSoonSection />
+                </Suspense>
 
-                {/* Đề Cử */}
-                <RecommendedSection />
+                <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
+                    <RecommendedSection />
+                </Suspense>
             </div>
 
-            {/* Sidebar - 4 columns on large screens */}
             <aside className="lg:col-span-4 space-y-6">
-                {/* Anime Hot */}
-                <AnimeHotList />
+                <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
+                    <AnimeHotList />
+                </Suspense>
 
-                {/* Bảng Xếp Hạng */}
-                <RankingBoardWrapper />
+                <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
+                    <RankingBoardWrapper />
+                </Suspense>
             </aside>
         </div>
     );

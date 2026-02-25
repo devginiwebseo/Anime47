@@ -6,6 +6,7 @@ export class CommentService {
     async addComment(data: {
         storyId: string;
         author: string;
+        email?: string;
         content: string;
         userIp: string;
         rating?: number;
@@ -34,15 +35,16 @@ export class CommentService {
     }
 
     // Lấy comments của story
-    async getStoryComments(storyId: string, limit?: number) {
-        const comments = await commentRepository.findByStoryId(storyId, limit);
+    async getStoryComments(storyId: string, limit?: number, userIp?: string, pendingIds?: string[]) {
+        const comments = await commentRepository.findByStoryId(storyId, limit, userIp, pendingIds);
         
         // Format comments cho frontend
-        return comments.map(comment => ({
+        return comments.map((comment: any) => ({
             id: comment.id,
             author: comment.author,
             content: comment.content,
             rating: comment.rating,
+            status: comment.status,
             createdAt: this.formatRelativeTime(comment.createdAt),
         }));
     }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { writeFile, mkdir } from 'fs/promises';
+import { writeFile, mkdir, unlink } from 'fs/promises';
 import path from 'path';
 
 export async function POST(request: NextRequest) {
@@ -44,5 +44,32 @@ export async function POST(request: NextRequest) {
     } catch (error: any) {
         console.error('Upload error:', error);
         return NextResponse.json({ error: error.message || 'Upload failed' }, { status: 500 });
+    }
+}
+
+export async function DELETE(request: NextRequest) {
+    try {
+        const { searchParams } = new URL(request.url);
+        const url = searchParams.get('url');
+
+        if (!url || !url.startsWith('/uploads/')) {
+            return NextResponse.json({ error: 'Invalid URL for deletion' }, { status: 400 });
+        }
+
+        const filename = path.basename(url);
+        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+
+        try {
+            await unlink(filePath);
+        } catch (err: any) {
+            if (err.code !== 'ENOENT') {
+                throw err;
+            }
+        }
+
+        return NextResponse.json({ success: true });
+    } catch (error: any) {
+        console.error('Delete error:', error);
+        return NextResponse.json({ error: error.message || 'Delete failed' }, { status: 500 });
     }
 }

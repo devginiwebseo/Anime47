@@ -8,22 +8,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model accounts {
-  id                String  @id
+model Account {
+  id                String  @id @default(cuid())
   userId            String
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
-  users             users   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@map("accounts")
 }
 
 model actors {
@@ -79,17 +80,19 @@ model chapters {
 }
 
 model comments {
-  id        String   @id
+  id        String   @id @default(cuid())
   storyId   String
   author    String
+  email     String?
   content   String
   userIp    String?
   rating    Int?
+  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   userId    String?
   stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  users     users?   @relation(fields: [userId], references: [id])
+  users     User?    @relation(fields: [userId], references: [id])
 
   @@index([createdAt])
   @@index([storyId])
@@ -117,7 +120,7 @@ model error_reports {
   userId    String?
   createdAt DateTime @default(now())
   updatedAt DateTime
-  users     users?   @relation(fields: [userId], references: [id])
+  users     User?    @relation(fields: [userId], references: [id])
 }
 
 model favorites {
@@ -126,7 +129,7 @@ model favorites {
   storyId   String
   createdAt DateTime @default(now())
   stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  users     users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, storyId])
   @@index([userId])
@@ -174,12 +177,12 @@ model pages {
 }
 
 model ratings {
-  id        String   @id
+  id        String   @id @default(cuid())
   storyId   String
   userIp    String
   score     Int
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   userId    String?
   stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
 
@@ -195,18 +198,20 @@ model reading_progress {
   lastReadAt DateTime  @default(now())
   chapters   chapters? @relation(fields: [chapterId], references: [id])
   stories    stories   @relation(fields: [storyId], references: [id], onDelete: Cascade)
-  users      users     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  users      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, storyId])
   @@index([userId])
 }
 
-model sessions {
-  id           String   @id
+model Session {
+  id           String   @id @default(cuid())
   sessionToken String   @unique
   userId       String
   expires      DateTime
-  users        users    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
 }
 
 model settings {
@@ -302,8 +307,8 @@ model tags {
   story_tags  story_tags[]
 }
 
-model users {
-  id               String             @id
+model User {
+  id               String             @id @default(cuid())
   name             String?
   email            String?            @unique
   emailVerified    DateTime?
@@ -311,19 +316,22 @@ model users {
   role             String             @default("USER")
   password         String?
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
-  accounts         accounts[]
+  updatedAt        DateTime           @updatedAt
+  accounts         Account[]
   comments         comments[]
   error_reports    error_reports[]
   favorites        favorites[]
   reading_progress reading_progress[]
-  sessions         sessions[]
+  sessions         Session[]
+
+  @@map("users")
 }
 
-model verification_tokens {
+model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
 
   @@unique([identifier, token])
+  @@map("verification_tokens")
 }

@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import MainLayoutWrapper from '@/components/layout/MainLayoutWrapper'
+import { AuthProvider } from '@/components/providers/AuthProvider'
 
 const inter = Inter({
     subsets: ['latin', 'vietnamese'],
@@ -30,7 +31,9 @@ export default function RootLayout({
     return (
         <html lang="vi" suppressHydrationWarning>
             <body className={inter.className} suppressHydrationWarning>
-                <MainLayoutWrapper>{children}</MainLayoutWrapper>
+                <AuthProvider>
+                    <MainLayoutWrapper>{children}</MainLayoutWrapper>
+                </AuthProvider>
             </body>
         </html>
     )

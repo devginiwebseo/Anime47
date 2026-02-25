@@ -1,5 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import AnimeDetailHeader from '@/components/detail/AnimeDetailHeader';
 import EpisodeList from '@/components/detail/EpisodeList';
 import AnimeDescription from '@/components/detail/AnimeDescription';
@@ -29,8 +30,13 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     const storyGenres = await genreService.getGenresByStoryId(story.id);
     const genres = storyGenres.map(g => g.name);
 
-    // Fetch comments
-    const comments = await commentService.getStoryComments(story.id, 20);
+    // Get user IP for showing pending comments
+    const headersList = await headers();
+    const userIp = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown';
+
+    // For SSR, we can't access localStorage. 
+    // We'll rely on the client-side fetch in CommentSection (if implemented) or just show APPROVED ones first.
+    const comments = await commentService.getStoryComments(story.id, 20, userIp, []);
 
     // Fetch rating info
     const ratingInfo = await ratingService.getStoryRatingInfo(story.id);

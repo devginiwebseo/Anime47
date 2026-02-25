@@ -1,36 +1,49 @@
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import { PrismaAdapter } from "@auth/prisma-adapter";
+import { prisma } from "@/lib/prisma";
+import bcrypt from "bcryptjs";
 
-if (!process.env.NEXTAUTH_SECRET) {
-  console.warn("NEXTAUTH_SECRET is not set, using default for development.");
-}
+const handler = NextAuth({
+  adapter: PrismaAdapter(prisma) as any,
 
-export const authOptions: AuthOptions = {
+  session: {
+    strategy: "jwt",
+  },
+
   providers: [
     CredentialsProvider({
-      name: "Credentials",
+      name: "credentials",
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        // Mock authentication - replace with DB check later
-        if (
-          credentials?.email === "admin@anime47.com" &&
-          credentials?.password === "admin"
-        ) {
-          return {
-            id: "1",
-            name: "Admin User",
-            email: "admin@anime47.com",
-            image: "https://i.pravatar.cc/150?u=admin",
-            role: "ADMIN",
-          };
-        }
-        return null;
+        if (!credentials?.email || !credentials?.password) return null;
+
+        const user = await prisma.user.findUnique({
+          where: { email: credentials.email },
+        });
+
+        if (!user || !user.password) return null;
+
+        const isValid = await bcrypt.compare(
+          credentials.password,
+          user.password
+        );
+
+        if (!isValid) return null;
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],
+
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -47,13 +60,11 @@ export const authOptions: AuthOptions = {
       return session;
     },
   },
+
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: "/admin/login",
-    error: "/admin/login",
   },
-  secret: process.env.NEXTAUTH_SECRET || "supersecretkey",
-};
-
-const handler = NextAuth(authOptions);
+});
 
 export { handler as GET, handler as POST };
