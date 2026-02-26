@@ -13,12 +13,12 @@ export default async function AnimeHotList() {
         stories.map(async (story) => {
             const totalEpisodes = await chapterService.countChapters(story.id);
             const latestChapter = await chapterService.getLatestChapter(story.id);
-            
+
             let status = 'Đang cập nhật';
             if (story.status === 'completed' || story.status === 'Hoàn thành') {
                 status = 'Full';
             } else if (latestChapter) {
-                status = totalEpisodes > 0 
+                status = totalEpisodes > 0
                     ? `Tập ${latestChapter.index}/${totalEpisodes}`
                     : `Tập ${latestChapter.index}`;
             }
@@ -35,9 +35,9 @@ export default async function AnimeHotList() {
     );
 
     return (
-        <div className="bg-gray-800/50 rounded-xl p-4 mb-6">
-            <h3 className="text-xl font-bold text-red-500 uppercase mb-4 pb-2 border-b border-gray-700">
-                Anime Hot
+        <div className="bg-gray-800 rounded-lg p-6">
+            <h3 className="text-xl font-bold text-primary uppercase mb-4 pb-2 border-b border-gray-700">
+                🔥 Phim Hot Mới
             </h3>
 
             {hotAnimeData.length > 0 ? (
@@ -66,8 +66,8 @@ export default async function AnimeHotList() {
                             </div>
 
                             {/* Info */}
-                            <div className="flex-1 min-w-0">
-                                <h4 className="text-white font-medium text-sm line-clamp-2 group-hover:text-red-500 transition-colors mb-1">
+                            <div className="flex-1">
+                                <h4 className="text-white font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors mb-1">
                                     {anime.title}
                                 </h4>
                                 <div className="flex items-center gap-2 text-xs">
@@ -89,8 +89,8 @@ export default async function AnimeHotList() {
             )}
 
             {/* View all button */}
-            <button className="w-full mt-4 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2">
-                <span>🎯</span>
+            <button className="w-full mt-4 bg-primary hover:brightness-110 text-white py-2 px-4 rounded-lg font-medium text-sm transition-colors duration-200 flex items-center justify-center gap-2">
+                <span>Xem Thêm</span>
                 Xem anime ngẫu nhiên
             </button>
         </div>

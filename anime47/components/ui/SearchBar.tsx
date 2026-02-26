@@ -90,11 +90,11 @@ export default function SearchBar() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
                     placeholder="Tìm anime..."
-                    className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-full px-5 py-2.5 pr-12 focus:outline-none focus:ring-2 focus:ring-red-500 transition-all duration-200"
+                    className="w-full bg-gray-800 text-white placeholder-gray-400 rounded-full px-5 py-2.5 pr-12 focus:outline-none focus:ring-2 focus:ring-primary transition-all duration-200"
                 />
                 <button
                     type="submit"
-                    className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-red-600 hover:bg-red-700 text-white rounded-full p-2 transition-colors duration-200"
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 bg-primary hover:brightness-110 text-white rounded-full p-2 transition-all duration-200"
                 >
                     {isLoading ? (
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -144,7 +144,7 @@ export default function SearchBar() {
                             <div className="flex-1 min-w-0">
                                 <p className="text-white text-sm font-medium truncate">{item.title}</p>
                                 {item.quality && (
-                                    <span className="text-xs text-red-500">{item.quality}</span>
+                                    <span className="text-xs text-primary">{item.quality}</span>
                                 )}
                             </div>
                         </Link>
@@ -152,7 +152,7 @@ export default function SearchBar() {
                     <Link
                         href={`/search?q=${encodeURIComponent(searchQuery)}`}
                         onClick={handleSuggestionClick}
-                        className="block p-3 text-center text-sm text-red-500 hover:bg-gray-700 border-t border-gray-700"
+                        className="block p-3 text-center text-sm text-primary hover:bg-gray-700 border-t border-gray-700"
                     >
                         Xem tất cả kết quả →
                     </Link>

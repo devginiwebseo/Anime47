@@ -10,7 +10,9 @@
     "crawl:test": "npx tsx scripts/crawl-anime.ts --test 10",
     "crawl:full": "npx tsx scripts/crawl-anime.ts",
     "crawl:genres": "npx tsx scripts/crawl-anime.ts --genres-only",
-    "crawl:stories": "npx tsx scripts/crawl-anime.ts --stories-only"
+    "crawl:stories": "npx tsx scripts/crawl-anime.ts --stories-only",
+    "seed:homepage": "echo 'No seed needed for now'",
+    "seed:admin": "npx tsx scripts/seed-admin.ts"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",

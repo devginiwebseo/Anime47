@@ -34,7 +34,7 @@ export default function RankingBoard({ rankingData }: RankingBoardProps) {
 
     return (
         <div className="bg-gray-800/50 rounded-xl p-4">
-            <h3 className="text-xl font-bold text-red-500 uppercase mb-4 pb-2 border-b border-gray-700">
+            <h3 className="text-xl font-bold text-primary uppercase mb-4 pb-2 border-b border-gray-700">
                 Bảng Xếp Hạng
             </h3>
 
@@ -44,9 +44,9 @@ export default function RankingBoard({ rankingData }: RankingBoardProps) {
                     <button
                         key={tab}
                         onClick={() => setActiveTab(tab)}
-                        className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold uppercase transition-all duration-200 ${activeTab === tab
-                            ? 'bg-red-600 text-white'
-                            : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
+                        className={`flex-1 py-2 text-sm font-semibold text-center transition-colors rounded ${activeTab === tab
+                                ? 'bg-primary text-white'
+                                : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                             }`}
                     >
                         {tab}
@@ -95,8 +95,8 @@ export default function RankingBoard({ rankingData }: RankingBoardProps) {
                             </div>
 
                             {/* Info */}
-                            <div className="flex-1 min-w-0">
-                                <h4 className="text-white font-medium text-xs line-clamp-2 group-hover:text-red-500 transition-colors mb-1">
+                            <div className="flex-1 min-w-0 py-1">
+                                <h4 className="text-white font-medium text-xs line-clamp-2 group-hover:text-primary transition-colors mb-1">
                                     {anime.title}
                                 </h4>
                                 <div className="flex items-center gap-2 text-xs text-gray-400">

@@ -13,7 +13,7 @@ export default async function NewReleasesSection() {
         stories.map(async (story) => {
             const totalEpisodes = await chapterService.countChapters(story.id);
             const latestChapter = await chapterService.getLatestChapter(story.id);
-            
+
             return {
                 id: story.id,
                 title: story.title,
@@ -30,10 +30,10 @@ export default async function NewReleasesSection() {
 
     return (
         <section className="mb-12">
-            <SectionHeader title="Mới Cập Nhật" href="/moi-cap-nhat" icon="🆕" />
+            <SectionHeader title="Mới Cập Nhật" href="/anime-bo" icon="🆕" />
 
             {animeData.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
                     {animeData.map((anime) => (
                         <AnimeCard key={anime.id} {...anime} />
                     ))}

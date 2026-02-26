@@ -5,13 +5,23 @@ import React, { useState } from 'react';
 interface SettingsFormProps {
     initialHeaderSettings: HeaderSettings;
     initialFooterSettings: FooterSettings;
+    initialThemeSettings: ThemeSettings;
+}
+
+interface ThemeSettings {
+    primaryColor: string;
+    backgroundColor: string;
 }
 
 interface HeaderSettings {
     siteName: string;
     logoUrl: string;
     showSearch: boolean;
-    menuItems: { label: string; href: string }[];
+    menuItems: {
+        label: string;
+        href: string;
+        submenu?: { label: string; href: string }[]
+    }[];
     announcement: string;
 }
 
@@ -23,8 +33,8 @@ interface FooterSettings {
     showBackToTop: boolean;
 }
 
-export default function SettingsForm({ initialHeaderSettings, initialFooterSettings }: SettingsFormProps) {
-    const [activeTab, setActiveTab] = useState<'header' | 'footer'>('header');
+export default function SettingsForm({ initialHeaderSettings, initialFooterSettings, initialThemeSettings }: SettingsFormProps) {
+    const [activeTab, setActiveTab] = useState<'header' | 'footer' | 'theme'>('header');
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
 
@@ -32,6 +42,8 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
     const [header, setHeader] = useState<HeaderSettings>(initialHeaderSettings);
     // Footer state
     const [footer, setFooter] = useState<FooterSettings>(initialFooterSettings);
+    // Theme state
+    const [theme, setTheme] = useState<ThemeSettings>(initialThemeSettings);
 
     const handleSave = async () => {
         setSaving(true);
@@ -48,6 +60,11 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key: 'footer', value: footer }),
                 }),
+                fetch('/api/admin/settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key: 'theme', value: theme }),
+                }),
             ]);
             setSuccess('Cài đặt đã được lưu thành công!');
             setTimeout(() => setSuccess(''), 3000);
@@ -58,12 +75,56 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
         }
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'POST',
+                body: formData,
+            });
+            const data = await res.json();
+            if (data.url) {
+                setHeader({ ...header, logoUrl: data.url });
+            } else {
+                alert('Tải ảnh thất bại: ' + data.error);
+            }
+        } catch (error) {
+            alert('Lỗi tải ảnh');
+        }
+    };
+
     // Menu items helpers
     const addMenuItem = () => setHeader({ ...header, menuItems: [...header.menuItems, { label: '', href: '' }] });
     const removeMenuItem = (i: number) => setHeader({ ...header, menuItems: header.menuItems.filter((_, idx) => idx !== i) });
     const updateMenuItem = (i: number, field: 'label' | 'href', val: string) => {
         const items = [...header.menuItems];
         items[i] = { ...items[i], [field]: val };
+        setHeader({ ...header, menuItems: items });
+    };
+
+    const addSubMenuItem = (i: number) => {
+        const items = [...header.menuItems];
+        if (!items[i].submenu) items[i].submenu = [];
+        items[i].submenu!.push({ label: '', href: '' });
+        setHeader({ ...header, menuItems: items });
+    };
+    const removeSubMenuItem = (i: number, subI: number) => {
+        const items = [...header.menuItems];
+        if (items[i].submenu) {
+            items[i].submenu = items[i].submenu!.filter((_, idx) => idx !== subI);
+        }
+        setHeader({ ...header, menuItems: items });
+    };
+    const updateSubMenuItem = (i: number, subI: number, field: 'label' | 'href', val: string) => {
+        const items = [...header.menuItems];
+        if (items[i].submenu) {
+            items[i].submenu![subI] = { ...items[i].submenu![subI], [field]: val };
+        }
         setHeader({ ...header, menuItems: items });
     };
 
@@ -104,6 +165,12 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                 >
                     📌 Footer
                 </button>
+                <button
+                    onClick={() => setActiveTab('theme')}
+                    className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+                >
+                    🎨 Giao Diện
+                </button>
             </div>
 
             {/* Header Settings */}
@@ -118,7 +185,18 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                         </div>
                         <div>
                             <label className={labelClass}>Logo URL</label>
-                            <input value={header.logoUrl} onChange={(e) => setHeader({ ...header, logoUrl: e.target.value })} className={inputClass} placeholder="https://..." />
+                            <div className="flex gap-2 items-center">
+                                <input value={header.logoUrl} onChange={(e) => setHeader({ ...header, logoUrl: e.target.value })} className={inputClass} placeholder="https://..." />
+                                <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+                                    Tải Ảnh
+                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                </label>
+                            </div>
+                            {header.logoUrl && (
+                                <div className="mt-2 bg-slate-100 border p-2 rounded w-fit">
+                                    <img src={header.logoUrl} alt="Logo" className="h-10 object-contain" />
+                                </div>
+                            )}
                         </div>
                     </div>
 
@@ -138,14 +216,32 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                             <label className={labelClass}>Menu điều hướng</label>
                             <button onClick={addMenuItem} className="text-xs text-blue-600 hover:text-blue-800 font-semibold">+ Thêm mục</button>
                         </div>
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             {header.menuItems.map((item, i) => (
-                                <div key={i} className="flex gap-2 items-center">
-                                    <input value={item.label} onChange={(e) => updateMenuItem(i, 'label', e.target.value)} className={inputClass} placeholder="Tiêu đề" />
-                                    <input value={item.href} onChange={(e) => updateMenuItem(i, 'href', e.target.value)} className={inputClass} placeholder="/duong-dan" />
-                                    <button onClick={() => removeMenuItem(i)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg flex-shrink-0">
-                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                    </button>
+                                <div key={i} className="border border-slate-200 rounded-xl p-3 bg-slate-50 relative">
+                                    <div className="flex gap-2 items-center">
+                                        <input value={item.label} onChange={(e) => updateMenuItem(i, 'label', e.target.value)} className={inputClass} placeholder="Tiêu đề (VD: Thể Loại)" />
+                                        <input value={item.href} onChange={(e) => updateMenuItem(i, 'href', e.target.value)} className={inputClass} placeholder="/duong-dan" />
+                                        <button onClick={() => addSubMenuItem(i)} className="text-xs font-semibold text-blue-600 bg-blue-100 hover:bg-blue-200 px-3 py-2.5 rounded-xl whitespace-nowrap transition">+ Menu Con</button>
+                                        <button onClick={() => removeMenuItem(i)} className="p-2.5 text-red-500 hover:bg-red-200 bg-red-100 rounded-xl flex-shrink-0 transition">
+                                            XOÁ
+                                        </button>
+                                    </div>
+
+                                    {/* Submenu rendering */}
+                                    {item.submenu && item.submenu.length > 0 && (
+                                        <div className="mt-3 pl-6 border-l-2 border-slate-300 space-y-2">
+                                            {item.submenu.map((sub, subI) => (
+                                                <div key={subI} className="flex gap-2 items-center">
+                                                    <input value={sub.label} onChange={(e) => updateSubMenuItem(i, subI, 'label', e.target.value)} className={`${inputClass} !py-1.5 !text-xs bg-white`} placeholder="Tiêu đề Menu Con" />
+                                                    <input value={sub.href} onChange={(e) => updateSubMenuItem(i, subI, 'href', e.target.value)} className={`${inputClass} !py-1.5 !text-xs bg-white`} placeholder="/duong-dan" />
+                                                    <button onClick={() => removeSubMenuItem(i, subI)} className="p-1.5 text-red-500 hover:bg-red-200 bg-red-100 rounded-lg flex-shrink-0 transition text-xs font-bold px-3">
+                                                        XOÁ
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>
@@ -217,6 +313,32 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                                     </button>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Theme Settings */}
+            {activeTab === 'theme' && (
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
+                    <h2 className="text-lg font-bold text-slate-800">Cài đặt Giao Diện (Theme)</h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className={labelClass}>Màu Chủ Đạo (Primary Color)</label>
+                            <div className="flex items-center gap-3">
+                                <input type="color" value={theme.primaryColor} onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })} className="w-12 h-12 rounded cursor-pointer border-0 p-0" />
+                                <input value={theme.primaryColor} onChange={(e) => setTheme({ ...theme, primaryColor: e.target.value })} className={inputClass} placeholder="#d32f2f" />
+                            </div>
+                            <p className="text-xs text-slate-500 mt-2">Dùng cho tiêu đề nổi bật, nút bấm, liên kết hover.</p>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Màu Nền Header & Footer (Background Color)</label>
+                            <div className="flex items-center gap-3">
+                                <input type="color" value={theme.backgroundColor} onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })} className="w-12 h-12 rounded cursor-pointer border-0 p-0" />
+                                <input value={theme.backgroundColor} onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })} className={inputClass} placeholder="#111827" />
+                            </div>
+                            <p className="text-xs text-slate-500 mt-2">Dùng làm màu nền cho thanh Header và khu vực Footer.</p>
                         </div>
                     </div>
                 </div>

@@ -1,67 +1,60 @@
 import { useState, useEffect } from 'react';
 
+export interface MenuItem {
+  label: string;
+  href: string;
+}
+
 export interface SiteSettings {
-  siteName: string;
-  siteDescription: string;
-  logoUrl: string;
-  faviconUrl: string;
   header: {
-    backgroundColor: string;
-    textColor: string;
+    siteName: string;
+    logoUrl: string;
     showSearch: boolean;
+    menuItems: MenuItem[];
+    announcement: string;
   };
   footer: {
-    content: string;
-    copyright: string;
+    copyrightText: string;
+    description: string;
+    socialLinks: { platform: string; url: string }[];
+    footerLinks: MenuItem[];
+    showBackToTop: boolean;
+  };
+  theme: {
+    primaryColor: string;
     backgroundColor: string;
-    textColor: string;
-  };
-  seo: {
-    noIndex: boolean;
-    headTags: string;
-  };
-  schema: {
-    homepageSchema: string;
-    customScripts: string;
-  };
-  customJs: string;
-  socials: {
-    facebook: string;
-    twitter: string;
-    discord: string;
   };
 }
 
 const defaultSettings: SiteSettings = {
-  siteName: "Anime47",
-  siteDescription: "Website đọc truyện tranh online lớn nhất",
-  logoUrl: "/logo.png",
-  faviconUrl: "/favicon.ico",
   header: {
-    backgroundColor: "#1890ff",
-    textColor: "#ffffff",
+    siteName: 'Anime47',
+    logoUrl: '',
     showSearch: true,
+    menuItems: [
+        { label: 'Trang chủ', href: '/' },
+        { label: 'Phim mới', href: '/new' },
+        { label: 'Thể loại', href: '/genres' },
+    ],
+    announcement: '',
   },
   footer: {
-    content: "Anime47 - Đọc truyện tranh online",
-    copyright: "© 2024 Anime47. All rights reserved.",
-    backgroundColor: "#001529",
-    textColor: "#ffffff",
+    copyrightText: '© 2026 Anime47. All rights reserved.',
+    description: 'Anime47 - Trang web xem anime chất lượng cao với phụ đề Việt.',
+    socialLinks: [
+        { platform: 'facebook', url: '' },
+    ],
+    footerLinks: [
+        { label: 'Liên hệ', href: '/lien-he' },
+        { label: 'Điều khoản', href: '/dieu-khoan' },
+        { label: 'Riêng tư', href: '/chinh-sach-rieng-tu' },
+    ],
+    showBackToTop: true,
   },
-  seo: {
-    noIndex: false,
-    headTags: "",
-  },
-  schema: {
-    homepageSchema: "",
-    customScripts: "",
-  },
-  customJs: "",
-  socials: {
-    facebook: "",
-    twitter: "",
-    discord: "",
-  },
+  theme: {
+    primaryColor: '#d32f2f', // Default red
+    backgroundColor: '#111827', // Default gray-900
+  }
 };
 
 export const useSiteSettings = () => {
@@ -72,8 +65,12 @@ export const useSiteSettings = () => {
     fetch('/api/settings/public')
       .then((res) => res.json())
       .then((data) => {
-        if (data && Object.keys(data).length > 0) {
-          setSettings((prev) => ({ ...prev, ...data }));
+        if (data) {
+          setSettings({
+            header: { ...defaultSettings.header, ...data.header },
+            footer: { ...defaultSettings.footer, ...data.footer },
+            theme: { ...defaultSettings.theme, ...data.theme }
+          });
         }
       })
       .catch((err) => console.error("Failed to load settings", err))

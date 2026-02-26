@@ -24,26 +24,26 @@ export default function EpisodeNavigation({
         <div className="space-y-4">
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Link href="/" className="hover:text-red-500 transition-colors">
+                <Link href="/" className="hover:text-primary transition-colors">
                     🏠 Anime47
                 </Link>
                 <span>▶</span>
-                <Link href="/anime" className="hover:text-red-500 transition-colors">
+                <Link href="/anime" className="hover:text-primary transition-colors">
                     Anime Bộ
                 </Link>
                 <span>▶</span>
-                <Link 
-                    href={`/anime/${animeSlug}`} 
-                    className="hover:text-red-500 transition-colors line-clamp-1"
+                <Link
+                    href={`/anime/${animeSlug}`}
+                    className="hover:text-primary transition-colors line-clamp-1"
                 >
                     {animeTitle}
                 </Link>
                 <span>▶</span>
-                <span className="text-red-500 font-semibold">Tập {currentEpisode}</span>
+                <span className="text-primary font-semibold">Tập {currentEpisode}</span>
             </div>
 
             {/* Episode Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-red-500">
+            <h1 className="text-2xl md:text-3xl font-bold text-primary">
                 {animeTitle} - Tập {currentEpisode}
             </h1>
 
@@ -84,7 +84,7 @@ export default function EpisodeNavigation({
                 )}
 
                 {/* Server Selection */}
-                <button className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded text-sm font-semibold transition-colors">
+                <button className="bg-primary hover:brightness-110 text-white px-4 py-2 rounded text-sm font-semibold transition-colors">
                     SERVER 1
                 </button>
 

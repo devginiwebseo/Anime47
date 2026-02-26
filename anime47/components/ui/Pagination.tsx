@@ -46,7 +46,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
             {currentPage > 1 && (
                 <Link
                     href={createPageURL(currentPage - 1)}
-                    className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-red-600 transition-colors"
+                    className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-primary transition-colors"
                 >
                     &laquo; Trước
                 </Link>
@@ -58,8 +58,8 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
                     key={page}
                     href={createPageURL(page)}
                     className={`w-10 h-10 flex items-center justify-center rounded transition-colors ${currentPage === page
-                            ? 'bg-red-600 text-white font-bold'
-                            : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
+                        ? 'bg-primary text-white font-bold'
+                        : 'bg-gray-800 text-gray-400 hover:bg-gray-700'
                         }`}
                 >
                     {page}
@@ -70,7 +70,7 @@ export default function Pagination({ currentPage, totalPages }: PaginationProps)
             {currentPage < totalPages && (
                 <Link
                     href={createPageURL(currentPage + 1)}
-                    className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-red-600 transition-colors"
+                    className="px-4 py-2 bg-gray-800 text-white rounded hover:bg-primary transition-colors"
                 >
                     Tiếp &raquo;
                 </Link>

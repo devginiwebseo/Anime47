@@ -52,7 +52,7 @@ export default function WatchRelatedAnime({ animes }: WatchRelatedAnimeProps) {
 
                             {/* Quality Badge */}
                             {anime.quality && (
-                                <div className="absolute top-1 left-1 bg-red-600 text-white text-[10px] px-1 rounded">
+                                <div className="absolute top-1 left-1 bg-primary text-white text-[10px] px-1 rounded">
                                     {anime.quality}
                                 </div>
                             )}
@@ -60,7 +60,7 @@ export default function WatchRelatedAnime({ animes }: WatchRelatedAnimeProps) {
 
                         {/* Info */}
                         <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-medium text-sm line-clamp-2 group-hover:text-red-500 transition-colors">
+                            <h4 className="text-white font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
                                 {anime.title}
                             </h4>
                             {anime.currentEpisode && (

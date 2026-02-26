@@ -12,15 +12,21 @@ export default function Header() {
     const { settings } = useSiteSettings();
 
     return (
-        <header className="border-b border-gray-800" style={{ backgroundColor: settings.header.backgroundColor, color: settings.header.textColor }}>
+        <header className="border-b border-gray-800 text-white" style={{ backgroundColor: settings.theme.backgroundColor }}>
+            {/* Announcement Bar if any */}
+            {settings.header.announcement && (
+                <div className="text-white text-center py-1 text-sm font-medium tracking-wide" style={{ backgroundColor: settings.theme.primaryColor }}>
+                    {settings.header.announcement}
+                </div>
+            )}
             {/* Top Header with Logo, Navigation, and Search */}
             <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center justify-between gap-6">
+                <div className="flex items-center justify-between gap-8">
                     {/* Logo */}
-                    <Logo src={settings.logoUrl} />
+                    <Logo src={settings.header.logoUrl || '/logo.png'} />
 
                     {/* Navigation */}
-                    <Navigation />
+                    <Navigation menuItems={settings.header.menuItems} />
 
                     {/* Search Bar */}
                     {settings.header.showSearch && <SearchBar />}

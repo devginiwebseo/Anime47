@@ -3,16 +3,18 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET() {
   try {
-    const setting = await prisma.settings.findUnique({
-      where: { key: 'site_settings' },
+    const [headerSetting, footerSetting, themeSetting] = await Promise.all([
+      prisma.settings.findUnique({ where: { key: 'header' } }),
+      prisma.settings.findUnique({ where: { key: 'footer' } }),
+      prisma.settings.findUnique({ where: { key: 'theme' } })
+    ]);
+
+    return NextResponse.json({
+      header: headerSetting?.value || {},
+      footer: footerSetting?.value || {},
+      theme: themeSetting?.value || {},
     });
-
-    if (!setting) {
-      return NextResponse.json({});
-    }
-
-    return NextResponse.json(setting.value);
   } catch (error) {
-    return NextResponse.json({});
+    return NextResponse.json({ header: {}, footer: {}, theme: {} });
   }
 }

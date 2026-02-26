@@ -29,11 +29,17 @@ const defaultFooterSettings = {
     showBackToTop: true,
 };
 
+const defaultThemeSettings = {
+    primaryColor: '#d32f2f',
+    backgroundColor: '#111827',
+};
+
 export default async function AdminSettingsPage() {
     // Lấy settings từ DB
-    const [headerSetting, footerSetting] = await Promise.all([
+    const [headerSetting, footerSetting, themeSetting] = await Promise.all([
         prisma.settings.findUnique({ where: { key: 'header' } }),
         prisma.settings.findUnique({ where: { key: 'footer' } }),
+        prisma.settings.findUnique({ where: { key: 'theme' } }),
     ]);
 
     const headerSettings = headerSetting?.value
@@ -44,16 +50,21 @@ export default async function AdminSettingsPage() {
         ? { ...defaultFooterSettings, ...(footerSetting.value as any) }
         : defaultFooterSettings;
 
+    const themeSettings = themeSetting?.value
+        ? { ...defaultThemeSettings, ...(themeSetting.value as any) }
+        : defaultThemeSettings;
+
     return (
         <div className="space-y-6">
             <div>
                 <h1 className="text-2xl font-bold tracking-tight text-slate-800">Cài Đặt Hệ Thống</h1>
-                <p className="text-slate-500 text-sm mt-1">Quản lý cấu hình Header và Footer cho website.</p>
+                <p className="text-slate-500 text-sm mt-1">Quản lý cấu hình Header, Footer và Theme cho website.</p>
             </div>
 
             <SettingsForm
                 initialHeaderSettings={headerSettings}
                 initialFooterSettings={footerSettings}
+                initialThemeSettings={themeSettings}
             />
         </div>
     );

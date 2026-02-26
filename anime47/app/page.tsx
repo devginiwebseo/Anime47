@@ -8,7 +8,7 @@ import { Suspense } from 'react';
 
 export default async function Home() {
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 pt-[30px] ">
             <div className="lg:col-span-8 space-y-8">
                 <Suspense fallback={<div className="h-64 animate-pulse bg-gray-800 rounded-xl" />}>
                     <NewReleasesSection />

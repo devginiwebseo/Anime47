@@ -118,7 +118,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
     };
 
     return (
-        <div className="bg-gray-800 rounded-lg p-6">
+        <div id="comments" className="bg-gray-800 rounded-lg p-6">
             <h2 className="text-white text-xl font-bold mb-4">
                 💬 Bình luận ({comments.length})
             </h2>
@@ -134,7 +134,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                 value={authorName}
                                 onChange={(e) => setAuthorName(e.target.value)}
                                 placeholder="Tên của bạn *"
-                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-red-500 focus:outline-none"
+                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none"
                             />
                         </div>
 
@@ -145,7 +145,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email của bạn (Không bắt buộc)"
-                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-red-500 focus:outline-none"
+                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none"
                             />
                         </div>
                     </div>
@@ -172,7 +172,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Nội dung bình luận của bạn..."
-                        className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-red-500 focus:outline-none resize-none"
+                        className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none resize-none"
                         rows={4}
                     />
 
@@ -194,7 +194,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                         <button
                             type="submit"
                             disabled={isSubmitting || !newComment.trim() || !authorName.trim()}
-                            className="bg-red-600 hover:bg-red-700 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-6 py-2 rounded font-semibold transition-colors"
+                            className="bg-primary hover:brightness-110 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-6 py-2 rounded font-semibold transition-colors"
                         >
                             {isSubmitting ? 'Đang gửi...' : 'Gửi bình luận'}
                         </button>

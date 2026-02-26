@@ -3,44 +3,23 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 
+interface SubMenuItem {
+    label: string;
+    href: string;
+}
+
 interface MenuItem {
     label: string;
     href: string;
-    submenu?: { label: string; href: string }[];
+    submenu?: SubMenuItem[];
 }
 
-const menuItems: MenuItem[] = [
-    { label: 'ANIME47', href: '/' },
-    { label: 'ANIME BỘ', href: '/anime-bo' },
-    { label: 'ANIME LẺ', href: '/anime-le' },
-    {
-        label: 'THỂ LOẠI',
-        href: '/the-loai',
-        submenu: [
-            { label: 'Hành Động', href: '/the-loai/hanh-dong' },
-            { label: 'Phiêu Lưu', href: '/the-loai/phieu-luu' },
-            { label: 'Viễn Tưởng', href: '/the-loai/vien-tuong' },
-            { label: 'Khoa Học', href: '/the-loai/khoa-hoc' },
-            { label: 'Hài Hước', href: '/the-loai/hai-huoc' },
-            { label: 'Giả Tưởng', href: '/the-loai/gia-tuong' },
-            { label: 'Võ Thuật', href: '/the-loai/vo-thuat' },
-            { label: 'Cờ Trang', href: '/the-loai/co-trang' },
-            { label: 'Tình Cảm', href: '/the-loai/tinh-cam' },
-            { label: 'Tâm Lý', href: '/the-loai/tam-ly' },
-            { label: 'Thần Thoại', href: '/the-loai/than-thoai' },
-            { label: 'Thần Thoại', href: '/the-loai/than-thoai' },
-        ],
-    },
-    { label: 'QUỐC GIA', href: '/quoc-gia' },
-    { label: 'LỊCH CHIẾU', href: '/lich-chieu' },
-];
-
-export default function Navigation() {
+export default function Navigation({ menuItems = [] }: { menuItems?: MenuItem[] }) {
     const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
     return (
         <nav className="flex-1">
-            <ul className="flex items-center gap-6">
+            <ul className="flex flex-wrap items-center gap-6">
                 {menuItems.map((item) => (
                     <li
                         key={item.label}
@@ -50,7 +29,7 @@ export default function Navigation() {
                     >
                         <Link
                             href={item.href}
-                            className="text-white hover:text-red-500 transition-colors duration-200 font-medium text-sm tracking-wide flex items-center gap-1"
+                            className="text-white hover:text-primary transition-colors duration-200 font-medium text-sm tracking-wide flex items-center gap-1"
                         >
                             {item.label}
                             {item.submenu && (

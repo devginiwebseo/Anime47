@@ -2,16 +2,16 @@
   "apps": [
     {
       "name": "crawler-animeez",
-      "script": "/home/flashpanel/animeez.online/scripts/run-crawler-continuous.sh",
-      "cwd": "/home/flashpanel/animeez.online",
+      "script": "/home/animeezonline/animeez.online/scripts/run-crawler-continuous.sh",
+      "cwd": "/home/animeezonline/animeez.online",
       "interpreter": "bash",
       "autorestart": true,
       "max_restarts": 10,
       "min_uptime": "10s",
       "watch": false,
       "log_date_format": "YYYY-MM-DD HH:mm:ss",
-      "error_file": "/home/flashpanel/animeez.online/logs/crawler-error.log",
-      "out_file": "/home/flashpanel/animeez.online/logs/crawler-out.log",
+      "error_file": "/home/animeezonline/animeez.online/logs/crawler-error.log",
+      "out_file": "/home/animeezonline/animeez.online/logs/crawler-out.log",
       "combine_logs": true,
       "merge_logs": true
     }

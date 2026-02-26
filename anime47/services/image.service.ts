@@ -24,7 +24,11 @@ class ImageService {
     const monthlyDir = path.join(this.baseUploadDir, month, year)
 
     if (!fs.existsSync(monthlyDir)) {
-      fs.mkdirSync(monthlyDir, { recursive: true })
+      try {
+        fs.mkdirSync(monthlyDir, { recursive: true })
+      } catch (err: any) {
+        logger.error(`Could not create directory ${monthlyDir}: ${err.message}`)
+      }
     }
 
     return monthlyDir
@@ -51,25 +55,45 @@ class ImageService {
         return null
       }
 
-      // Kiểm tra xem ảnh đã tải trước đó chưa (tìm ở tất cả thư mục)
       const hash = crypto.createHash('md5').update(imageUrl).digest('hex')
       const ext = this.getExtension(imageUrl)
-      const filename = `${hash}${ext}`
+      const hashFilename = `${hash}${ext}`
 
       // Kiểm tra ở thư mục gốc cũ (backward compatibility)
-      const oldFilepath = path.join(this.baseUploadDir, filename)
+      const oldFilepath = path.join(this.baseUploadDir, hashFilename)
       if (fs.existsSync(oldFilepath)) {
-        const localUrl = `/upload/image/${filename}`
+        const localUrl = `/upload/image/${hashFilename}`
         logger.info(`Image already exists (legacy): ${localUrl}`)
         return localUrl
       }
 
-      // Kiểm tra ở thư mục tháng hiện tại
+      // Thư mục tháng
       const monthlyDir = this.getMonthlyDir()
+      
+      // Lấy tên file gốc hoặc dùng hash
+      let originalName = ''
+      try {
+        const urlObj = new URL(imageUrl)
+        originalName = path.basename(urlObj.pathname).split('?')[0].split('#')[0]
+        originalName = originalName.replace(/[^\w\.\-]/g, '_')
+      } catch (e) {}
+
+      const filename = (originalName && originalName.length > 5 && originalName.includes('.')) 
+        ? originalName 
+        : hashFilename
+
       const monthlyFilepath = path.join(monthlyDir, filename)
+      const monthlyHashFilepath = path.join(monthlyDir, hashFilename)
+
+      // Kiểm tra xem đã tồn tại bản nào chưa
       if (fs.existsSync(monthlyFilepath)) {
         const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
         logger.info(`Image already exists: ${localUrl}`)
+        return localUrl
+      }
+      if (fs.existsSync(monthlyHashFilepath)) {
+        const localUrl = `${this.getMonthlyUrlPath()}/${hashFilename}`
+        logger.info(`Image already exists (hash): ${localUrl}`)
         return localUrl
       }
 
@@ -86,14 +110,25 @@ class ImageService {
       })
 
       // Lưu vào thư mục theo tháng
-      fs.writeFileSync(monthlyFilepath, response.data)
+      try {
+        fs.writeFileSync(monthlyFilepath, response.data)
+      } catch (writeErr: any) {
+        if (writeErr.code === 'EACCES') {
+          logger.error(`Permission denied: ${monthlyFilepath}. Please run 'sudo chown -R 777 public/upload' or similar on server.`)
+        }
+        throw writeErr
+      }
 
       const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
       logger.success(`Image saved: ${localUrl}`)
 
       return localUrl
     } catch (error: any) {
-      logger.error(`Failed to download image: ${imageUrl}`, error)
+      if (error.code === 'EACCES') {
+        logger.error(`Failed to download image due to permissions: ${imageUrl}`, error)
+      } else {
+        logger.error(`Failed to download image: ${imageUrl}`, error)
+      }
       return null // Trả về null để dùng URL gốc
     }
   }

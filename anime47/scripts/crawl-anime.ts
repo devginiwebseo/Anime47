@@ -108,7 +108,11 @@ function getMonthlyDir(): { dir: string; urlPath: string } {
   const urlPath = `/upload/image/${month}/${year}`
 
   if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir, { recursive: true })
+    try {
+      fs.mkdirSync(dir, { recursive: true })
+    } catch (err: any) {
+      log('error', `Could not create directory ${dir}: ${err.message}`)
+    }
   }
 
   return { dir, urlPath }
@@ -132,19 +136,39 @@ async function downloadImage(imageUrl: string): Promise<string | null> {
 
     const hash = crypto.createHash('md5').update(imageUrl).digest('hex')
     const ext = getExtension(imageUrl)
-    const filename = `${hash}${ext}`
+    const hashFilename = `${hash}${ext}`
 
     // Check legacy flat directory
-    const oldFilepath = path.join(BASE_UPLOAD_DIR, filename)
+    const oldFilepath = path.join(BASE_UPLOAD_DIR, hashFilename)
     if (fs.existsSync(oldFilepath)) {
-      return `/upload/image/${filename}`
+      return `/upload/image/${hashFilename}`
     }
 
     // Check monthly directory
     const { dir, urlPath } = getMonthlyDir()
+    
+    // Try to get original filename
+    let originalName = ''
+    try {
+      const urlObj = new URL(imageUrl)
+      originalName = path.basename(urlObj.pathname).split('?')[0].split('#')[0]
+      // Replace non-ascii/special chars just in case
+      originalName = originalName.replace(/[^\w\.\-]/g, '_')
+    } catch (e) {}
+
+    const filename = (originalName && originalName.length > 5 && originalName.includes('.')) 
+      ? originalName 
+      : hashFilename
+
     const filepath = path.join(dir, filename)
+    const hashFilepath = path.join(dir, hashFilename)
+
+    // If either version already exists, return it
     if (fs.existsSync(filepath)) {
       return `${urlPath}/${filename}`
+    }
+    if (fs.existsSync(hashFilepath)) {
+      return `${urlPath}/${hashFilename}`
     }
 
     // Download
@@ -156,12 +180,24 @@ async function downloadImage(imageUrl: string): Promise<string | null> {
       },
     })
 
-    fs.writeFileSync(filepath, response.data)
+    try {
+      fs.writeFileSync(filepath, response.data)
+    } catch (writeErr: any) {
+      if (writeErr.code === 'EACCES') {
+        log('error', `Permission denied: ${filepath}. Please run 'sudo chown -R 777 public/upload' or similar on server.`)
+      }
+      throw writeErr
+    }
+
     const localUrl = `${urlPath}/${filename}`
     log('success', `Image saved: ${localUrl}`)
     return localUrl
   } catch (error: any) {
-    log('error', `Failed to download image: ${imageUrl} - ${error.message}`)
+    if (error.code === 'EACCES') {
+      log('error', `Failed to save image due to permissions: ${imageUrl} - ${error.message}`)
+    } else {
+      log('error', `Failed to download image: ${imageUrl} - ${error.message}`)
+    }
     return null
   }
 }
@@ -859,9 +895,16 @@ async function main() {
         if (!CONFIG.FORCE_UPDATE) {
           const exists = await prisma.stories.findFirst({ where: { sourceUrl: url } })
           if (exists) {
-            log('info', `⏩ Skip existing story: ${exists.title}`)
-            sessionStats.stories++
-            continue
+            // Nếu đã có trong DB, kiểm tra xem đã có ảnh local chưa
+            // Nếu coverImage là null hoặc bắt đầu bằng http (remote), chúng ta sẽ không skip để nó thử tải lại ảnh
+            const hasLocalImage = exists.coverImage && (exists.coverImage.startsWith('/') || !exists.coverImage.startsWith('http'))
+            
+            if (hasLocalImage) {
+              log('info', `⏩ Skip existing story: ${exists.title}`)
+              sessionStats.stories++
+              continue
+            }
+            log('info', `🔄 Retrying story with missing/remote image: ${exists.title}`)
           }
         }
         

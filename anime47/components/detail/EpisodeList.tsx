@@ -16,25 +16,24 @@ interface EpisodeListProps {
 
 export default function EpisodeList({ animeSlug, episodes, currentEpisode }: EpisodeListProps) {
     return (
-        <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-white text-xl font-bold mb-4 flex items-center gap-2">
+        <div className="bg-[#1c1d22] rounded-lg p-6 border border-gray-800">
+            <h2 className="text-white text-xl font-bold mb-5 flex items-center gap-2">
                 📺 Danh sách tập phim
             </h2>
 
             {episodes.length > 0 ? (
-                <div className="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-12 gap-2">
+                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
                     {episodes.map((episode) => (
                         <Link
                             key={episode.id}
                             href={`/anime/${animeSlug}/tap-${episode.number}`}
                             className={`
-                                py-2 px-3 rounded font-semibold text-sm text-center transition-all duration-200
-                                ${
-                                    currentEpisode === episode.number
-                                        ? 'bg-red-600 text-white shadow-lg shadow-red-500/50'
-                                        : episode.isWatched
-                                        ? 'bg-gray-600 text-gray-300 hover:bg-gray-500'
-                                        : 'bg-gray-700 text-white hover:bg-red-500'
+                                py-2.5 px-3 rounded-md font-semibold text-sm text-center transition-colors duration-200
+                                ${currentEpisode === episode.number
+                                    ? 'bg-primary text-white shadow-xl'
+                                    : episode.isWatched
+                                        ? 'bg-gray-700 text-gray-400 hover:bg-gray-600 hover:text-white'
+                                        : 'bg-[#2b2d35] text-gray-300 hover:bg-primary hover:text-white'
                                 }
                             `}
                         >
@@ -49,7 +48,7 @@ export default function EpisodeList({ animeSlug, episodes, currentEpisode }: Epi
             )}
 
             {/* Note for users */}
-            <div className="mt-4 p-3 bg-gray-900 rounded text-xs text-gray-400 border-l-4 border-red-600">
+            <div className="mt-6 p-4 bg-[#14151a] rounded-r border-l-4 border-primary text-sm text-gray-400 shadow-inner">
                 <p>💡 <span className="text-white font-semibold">Lưu ý:</span> Xem hết tập này sẽ tự chuyển sang tập tiếp theo. Tình trạng xem sẽ được lưu lại để tiện cho lần xem sau.</p>
             </div>
         </div>

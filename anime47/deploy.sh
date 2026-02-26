@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 # Server Configuration
 SERVER_USER="root"
 SERVER_HOST="116.118.47.193"
-SERVER_PATH="/home/flashpanel/animeez.online"
+SERVER_PATH="/home/animeezonline/animeez.online"
 APP_NAME="animeez"
 
 # Excludes
@@ -33,6 +33,8 @@ EXCLUDES=(
   "coverage"
   ".vscode"
   ".idea"
+  "public/upload"
+  "public/uploads"
 )
 
 # Build exclude options for tar
@@ -64,11 +66,13 @@ echo -e "${BLUE}[1/7]${NC} Running pre-deployment checks..."
 
 # Check SSH connection
 echo "  ├─ Testing SSH connection..."
-if ! ssh -o ConnectTimeout=5 ${SERVER_USER}@${SERVER_HOST} "echo 'SSH connection OK'" > /dev/null 2>&1; then
+if ! ssh -o ConnectTimeout=5 ${SERVER_USER}@${SERVER_HOST} "echo 'SSH connection OK'; ls -d /home/*/ | xargs -n 1 basename" > /dev/null 2>&1; then
   echo -e "${RED}ERROR: Cannot connect to server!${NC}"
   exit 1
 fi
 echo -e "  └─ ${GREEN}✓ SSH connection successful${NC}"
+echo -e "  └─ ${BLUE}Available users on server:${NC}"
+ssh ${SERVER_USER}@${SERVER_HOST} "ls /home"
 
 # ───────────────────────────────────────────────────────────────
 # Step 2: Install dependencies and type check
@@ -86,9 +90,10 @@ echo -e "\n${BLUE}[3/7]${NC} Syncing files to production server (using tar over 
 ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=5 ${SERVER_USER}@${SERVER_HOST} "mkdir -p ${SERVER_PATH}"
 
 # Compress locally, send via ssh, and extract directly into the target folder
-# This avoids needing rsync installed on Windows
-tar $EXCLUDE_OPTS -czf - . | ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=5 ${SERVER_USER}@${SERVER_HOST} "cd ${SERVER_PATH} && tar -xzf -"
-echo -e "  └─ ${GREEN}✓ Files synced${NC}"
+# This avoids needing rsync installed on Windows. 
+# We delete existing folders to ensure deleted local files are also removed from server.
+tar $EXCLUDE_OPTS -czf - . | ssh -o ServerAliveInterval=30 -o ServerAliveCountMax=5 ${SERVER_USER}@${SERVER_HOST} "cd ${SERVER_PATH} && rm -rf scripts modules app lib services types && tar -xzf -"
+echo -e "  └─ ${GREEN}✓ Files synced and cleaned${NC}"
 
 # ───────────────────────────────────────────────────────────────
 # Step 3.5: Upload Environment Variables
@@ -104,13 +109,15 @@ fi
 # ───────────────────────────────────────────────────────────────
 # Step 4: Build and deploy on server
 # ───────────────────────────────────────────────────────────────
-echo -e "\n${BLUE}[4/7]${NC} Building and deploying on production server..."
-
-ssh ${SERVER_USER}@${SERVER_HOST} bash << 'ENDSSH'
+ssh ${SERVER_USER}@${SERVER_HOST} bash << ENDSSH
 set -e
 
 # Navigate to project directory
-cd /home/flashpanel/animeez.online
+cd ${SERVER_PATH}
+
+echo "  ├─ Stopping existing PM2 processes to free up DB connections..."
+pm2 stop ecosystem.production.config.js > /dev/null 2>&1 || true
+pm2 stop ecosystem.crawler.config.json > /dev/null 2>&1 || true
 
 echo "  ├─ Installing all dependencies (needed for build)..."
 npm install
@@ -127,6 +134,10 @@ npm run seed:homepage || echo "     Homepage seed skipped (may already exist)"
 echo "  ├─ Building Next.js application..."
 npm run build
 
+echo "  ├─ Setting permissions for upload directory..."
+mkdir -p public/upload
+chmod -R 777 public/upload
+
 echo "  └─ Production deployment completed"
 ENDSSH
 
@@ -139,16 +150,16 @@ echo -e "\n${BLUE}[6/7]${NC} Restarting application..."
 
 ssh ${SERVER_USER}@${SERVER_HOST} bash << ENDSSH
 set -e
-cd /home/flashpanel/animeez.online
+cd ${SERVER_PATH}
 
 # Ensure logs directory exists
 mkdir -p logs
 
 # Stop and delete old processes to ensure clean config
-echo "  ├─ Cleaning up PM2 processes..."
+echo "  ├─ Resetting PM2 processes..."
 pm2 delete ecosystem.production.config.js > /dev/null 2>&1 || true
 pm2 delete ${APP_NAME} > /dev/null 2>&1 || true
-pm2 delete crawler-anime47 > /dev/null 2>&1 || true  # Cleanup old task if exists
+pm2 delete crawler-animeez > /dev/null 2>&1 || true
 
 echo "  ├─ Starting ecosystem with PM2..."
 pm2 start ecosystem.production.config.js --update-env
@@ -164,8 +175,8 @@ echo -e "  └─ ${GREEN}✓ Application restarted${NC}"
 # ───────────────────────────────────────────────────────────────
 echo -e "\n${BLUE}[7/7]${NC} Verifying deployment..."
 
-ssh ${SERVER_USER}@${SERVER_HOST} bash << 'ENDSSH'
-cd /home/flashpanel/animeez.online
+ssh ${SERVER_USER}@${SERVER_HOST} bash << ENDSSH
+cd ${SERVER_PATH}
 echo "  ├─ PM2 Status:"
 pm2 list | grep animeez || echo "     No PM2 process found"
 ENDSSH

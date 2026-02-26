@@ -72,7 +72,7 @@ export default async function SearchPage(props: {
                 </h1>
                 {query && (
                     <p className="text-gray-400">
-                        Tìm thấy <span className="text-red-500 font-bold">{totalStories}</span> kết quả cho "{query}"
+                        Tìm thấy <span className="text-primary font-bold">{totalStories}</span> kết quả cho "{query}"
                         {totalStories > 0 && (
                             <span className="ml-2">
                                 (Trang {currentPage}/{totalPages})
