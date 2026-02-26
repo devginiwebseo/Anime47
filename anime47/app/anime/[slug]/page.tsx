@@ -13,6 +13,8 @@ import { chapterService } from '@/modules/chapter/chapter.service';
 import { genreService } from '@/modules/genre/genre.service';
 import { commentService } from '@/modules/comment/comment.service';
 import { ratingService } from '@/modules/rating/rating.service';
+import { prisma } from '@/lib/prisma';
+import { slugify } from '@/lib/helpers';
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
@@ -52,6 +54,22 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     // Parse cast from string to array
     const castArray = story.cast ? story.cast.split(',').map(c => c.trim()) : [];
 
+    // Parse directors
+    const directorNames = story.director ? story.director.split(',').map(d => d.trim()).filter(Boolean) : [];
+    let directors: { name: string, slug: string }[] = [];
+    if (directorNames.length > 0) {
+        const authorsInDb = await prisma.authors.findMany({
+            where: { name: { in: directorNames } }
+        });
+        directors = directorNames.map(name => {
+            const found = authorsInDb.find(a => a.name === name);
+            if (found) return { name: found.name, slug: found.slug };
+            return { name, slug: slugify(name) };
+        });
+    } else if (story.authors) {
+        directors = [{ name: story.authors.name, slug: story.authors.slug }];
+    }
+
     // Fetch related animes (same genre)
     const relatedStoriesRaw = await storyService.getRelatedStories(story.id, 8);
     const relatedAnimes = await Promise.all(
@@ -89,9 +107,12 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 totalEpisodes={chapters.length}
                 quality={story.quality || 'HD'}
                 genres={genres}
-                director={story.director || undefined}
+                directors={directors}
                 cast={castArray}
                 description={description}
+                duration={story.duration || undefined}
+                language={story.language || undefined}
+                views={story.views || 0}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
