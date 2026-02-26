@@ -6,11 +6,17 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "crawl:test": "npx tsx scripts/crawl-anime.ts --test 10",
+    "crawl:full": "npx tsx scripts/crawl-anime.ts",
+    "crawl:genres": "npx tsx scripts/crawl-anime.ts --genres-only",
+    "crawl:stories": "npx tsx scripts/crawl-anime.ts --stories-only"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.1",
     "@prisma/client": "5.22.0",
+    "@refinedev/core": "^5.0.9",
+    "@types/xml2js": "^0.4.14",
     "axios": "^1.13.5",
     "bcryptjs": "^3.0.3",
     "cheerio": "^1.2.0",
@@ -18,9 +24,11 @@
     "hls.js": "^1.6.15",
     "next": "16.1.6",
     "next-auth": "^4.24.13",
+    "playwright": "^1.58.2",
     "prisma": "5.22.0",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "xml2js": "^0.6.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
@@ -31,6 +39,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5"
   }
 }

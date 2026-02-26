@@ -16,6 +16,16 @@ class StoryRepository {
             genres: true,
           },
         },
+        story_actors: {
+          include: {
+            actors: true,
+          },
+        },
+        story_tags: {
+          include: {
+            tags: true,
+          },
+        },
       },
     })
   }
@@ -23,7 +33,7 @@ class StoryRepository {
   /**
    * Tạo hoặc update story
    */
-  async upsert(data: IStory) {
+  async upsert(data: IStory & { actorIds?: string[]; tagIds?: string[] }) {
     try {
       const story = await prisma.stories.upsert({
         where: { slug: data.slug },
@@ -47,6 +57,7 @@ class StoryRepository {
           duration: data.duration,
           quality: data.quality,
           language: data.language,
+          keywords: data.keywords,
           
           // Meta JSON
           metaJson: data.metaJson || {},
@@ -69,6 +80,7 @@ class StoryRepository {
           duration: data.duration,
           quality: data.quality,
           language: data.language,
+          keywords: data.keywords,
           
           // Meta JSON
           metaJson: data.metaJson || {},
@@ -87,6 +99,40 @@ class StoryRepository {
           data: data.genreIds.map(genreId => ({
             storyId: story.id,
             genreId,
+          })),
+          skipDuplicates: true,
+        })
+      }
+
+      // Update actors (many-to-many)
+      if (data.actorIds && data.actorIds.length > 0) {
+        // Delete old relations
+        await prisma.story_actors.deleteMany({
+          where: { storyId: story.id },
+        })
+
+        // Create new relations
+        await prisma.story_actors.createMany({
+          data: data.actorIds.map(actorId => ({
+            storyId: story.id,
+            actorId,
+          })),
+          skipDuplicates: true,
+        })
+      }
+
+      // Update tags (many-to-many)
+      if (data.tagIds && data.tagIds.length > 0) {
+        // Delete old relations
+        await prisma.story_tags.deleteMany({
+          where: { storyId: story.id },
+        })
+
+        // Create new relations
+        await prisma.story_tags.createMany({
+          data: data.tagIds.map(tagId => ({
+            storyId: story.id,
+            tagId,
           })),
           skipDuplicates: true,
         })

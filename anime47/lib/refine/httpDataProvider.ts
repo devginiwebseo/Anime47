@@ -8,7 +8,7 @@ const API_URL = "/api/refine";
 
 export const dataProvider: DataProvider = {
   getList: async ({ resource, pagination, filters, sorters }) => {
-    const { current = 1, pageSize = 10 } = pagination || {};
+    const { current = 1, pageSize = 10 } = (pagination as any) || {};
 
     const params = new URLSearchParams({
       resource,
@@ -117,7 +117,7 @@ export const dataProvider: DataProvider = {
         dataProvider.getOne({ resource, id }).then((res) => res.data)
       )
     );
-    return { data };
+    return { data: data as any };
   },
   custom: async ({ url, method, filters, sorters, payload, query, headers }) => {
     let requestUrl = `${url}?`;

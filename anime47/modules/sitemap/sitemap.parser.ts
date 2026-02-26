@@ -8,7 +8,7 @@ class SitemapParser {
    */
   private async parseXml(xml: string): Promise<any> {
     return new Promise((resolve, reject) => {
-      parseString(xml, { explicitArray: false }, (err, result) => {
+      parseString(xml, { explicitArray: false }, (err: Error | null, result: any) => {
         if (err) {
           logger.error('Failed to parse XML', err)
           reject(err)

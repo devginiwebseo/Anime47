@@ -28,35 +28,35 @@ model Account {
 }
 
 model actors {
-  id           String         @id
+  id           String         @id @default(cuid())
   name         String
   slug         String         @unique
   bio          String?
   avatarUrl    String?
   sourceUrl    String?
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime       @updatedAt
   story_actors story_actors[]
 
   @@index([slug])
 }
 
 model authors {
-  id        String    @id
+  id        String    @id @default(cuid())
   name      String
   slug      String    @unique
   bio       String?
   avatarUrl String?
   sourceUrl String?
   createdAt DateTime  @default(now())
-  updatedAt DateTime
+  updatedAt DateTime  @updatedAt
   stories   stories[]
 
   @@index([slug])
 }
 
 model chapters {
-  id               String             @id
+  id               String             @id @default(cuid())
   storyId          String
   title            String
   slug             String
@@ -66,7 +66,7 @@ model chapters {
   views            Int                @default(0)
   sourceUrl        String?
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime           @updatedAt
   metaJson         Json?
   filePath         String?
   wordCount        Int                @default(0)
@@ -136,20 +136,20 @@ model favorites {
 }
 
 model genres {
-  id           String         @id
+  id           String         @id @default(cuid())
   name         String
   slug         String         @unique
   description  String?
   sourceUrl    String?
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime
+  updatedAt    DateTime       @updatedAt
   story_genres story_genres[]
 
   @@index([slug])
 }
 
 model media {
-  id        String   @id
+  id        String   @id @default(cuid())
   storyId   String?
   type      String
   url       String
@@ -157,7 +157,7 @@ model media {
   width     Int?
   height    Int?
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
   stories   stories? @relation(fields: [storyId], references: [id], onDelete: Cascade)
 
   @@index([storyId])
@@ -165,13 +165,13 @@ model media {
 }
 
 model pages {
-  id              String   @id
+  id              String   @id @default(cuid())
   title           String
   slug            String   @unique
   content         String
   isPublished     Boolean  @default(true)
   createdAt       DateTime @default(now())
-  updatedAt       DateTime
+  updatedAt       DateTime @updatedAt
   metaDescription String?
   metaTitle       String?
 }
@@ -215,15 +215,15 @@ model Session {
 }
 
 model settings {
-  id        String   @id
+  id        String   @id @default(cuid())
   key       String   @unique
   value     Json
   createdAt DateTime @default(now())
-  updatedAt DateTime
+  updatedAt DateTime @updatedAt
 }
 
 model stories {
-  id               String             @id
+  id               String             @id @default(cuid())
   title            String
   slug             String             @unique
   description      String?
@@ -235,7 +235,7 @@ model stories {
   sourceUrl        String?
   authorId         String?
   createdAt        DateTime           @default(now())
-  updatedAt        DateTime
+  updatedAt        DateTime           @updatedAt
   alternativeName  String?
   cast             String?
   director         String?
@@ -262,7 +262,7 @@ model stories {
 }
 
 model story_actors {
-  id      String  @id
+  id      String  @id @default(cuid())
   storyId String
   actorId String
   actors  actors  @relation(fields: [actorId], references: [id], onDelete: Cascade)
@@ -274,7 +274,7 @@ model story_actors {
 }
 
 model story_genres {
-  id      String  @id
+  id      String  @id @default(cuid())
   storyId String
   genreId String
   genres  genres  @relation(fields: [genreId], references: [id], onDelete: Cascade)
@@ -286,7 +286,7 @@ model story_genres {
 }
 
 model story_tags {
-  id      String  @id
+  id      String  @id @default(cuid())
   storyId String
   tagId   String
   stories stories @relation(fields: [storyId], references: [id], onDelete: Cascade)
@@ -298,12 +298,12 @@ model story_tags {
 }
 
 model tags {
-  id          String       @id
+  id          String       @id @default(cuid())
   name        String
   slug        String       @unique
   description String?
   createdAt   DateTime     @default(now())
-  updatedAt   DateTime
+  updatedAt   DateTime     @updatedAt
   story_tags  story_tags[]
 }
 

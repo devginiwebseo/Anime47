@@ -2,12 +2,14 @@ import { httpService } from '@/services/http.service'
 import { imageService } from '@/services/image.service'
 import { load } from 'cheerio'
 import { logger } from '@/lib/logger'
-import { delay, chunkArray, slugify } from '@/lib/helpers'
+import { delay, chunkArray, slugify, cleanText, parseNumber, parseFloat as parseFloatHelper } from '@/lib/helpers'
 import { config } from '@/lib/config'
 import { prisma } from '@/lib/prisma'
 import { storyRepository } from './story.repository'
 import { storyMapper } from './story.mapper'
 import { genreRepository } from '../genre/genre.repository'
+import { actorRepository } from '../actor/actor.repository'
+import { tagRepository } from '../tag/tag.repository'
 import { IStoryRaw } from '@/types/story.types'
 
 class StoryService {
@@ -57,7 +59,11 @@ class StoryService {
         views: undefined,  // Không lấy views từ nguồn
       }
 
-      // Parse table info
+      // Parse table info - extract directors and actors with URLs
+      const directorsData: Array<{ name: string; url: string }> = []
+      const actorsData: Array<{ name: string; url: string }> = []
+      const keywordsData: string[] = []
+
       $('.movie-info-table tr').each((_, row) => {
         const $row = $(row)
         const headerText = $row.find('th').text().trim()
@@ -68,18 +74,31 @@ class StoryService {
           rawData.releaseYear = yearText
         }
         else if (headerText.includes('Đạo diễn')) {
-          const directors = $td.find('a').map((_, el) => $(el).text().trim()).get()
-          rawData.director = directors.join(', ')
+          $td.find('a').each((_, el) => {
+            const $el = $(el)
+            directorsData.push({
+              name: $el.text().trim(),
+              url: $el.attr('href') || '',
+            })
+          })
+          rawData.director = directorsData.map(d => d.name).join(', ')
         }
         else if (headerText.includes('Diễn viên')) {
-          const actors = $td.find('a').map((_, el) => $(el).text().trim()).get()
-          rawData.cast = actors.join(', ')
+          $td.find('a').each((_, el) => {
+            const $el = $(el)
+            actorsData.push({
+              name: $el.text().trim(),
+              url: $el.attr('href') || '',
+            })
+          })
+          rawData.cast = actorsData.map(a => a.name).join(', ')
         }
         else if (headerText.includes('Thể loại')) {
           rawData.genres = $td.find('a').map((_, el) => $(el).text().trim()).get()
         }
         else if (headerText.includes('Từ khóa')) {
           const keywords = $td.find('a').map((_, el) => $(el).text().trim()).get()
+          keywordsData.push(...keywords)
           rawData.keywords = keywords.join(', ')
         }
       })
@@ -89,9 +108,9 @@ class StoryService {
         const $el = $(el)
         const text = $el.find('span').text().trim()
         
-        if ($el.find('.icon-play').length > 0) {
+        if ($el.find('.icon-play').length > 0 || $el.find('i[class*="play"]').length > 0) {
           rawData.quality = text
-        } else if ($el.find('.icon-globe').length > 0) {
+        } else if ($el.find('.icon-globe').length > 0 || $el.find('i[class*="globe"]').length > 0) {
           rawData.language = text
         }
       })
@@ -126,28 +145,64 @@ class StoryService {
         normalized.thumbnail = localThumbnailUrl
       }
 
-      // Process genres (match với genres đã có trong DB)
+      // Process genres (match với genres đã có trong DB hoặc tạo mới)
       const genreIds: string[] = []
       if (rawData.genres && rawData.genres.length > 0) {
         for (const genreName of rawData.genres) {
           if (!genreName || genreName.trim() === '') continue
-          
-          // Chỉ match genres đã có, KHÔNG tự tạo mới
-          const slug = slugify(genreName)
-          const genre = await genreRepository.findBySlug(slug)
-          
-          if (genre) {
-            genreIds.push(genre.id)
+          const gSlug = slugify(genreName)
+          const genreId = await genreRepository.findOrCreate(genreName, gSlug)
+          genreIds.push(genreId)
+        }
+      }
+
+      // Process directors → authors table
+      let authorId: string | undefined
+      if (directorsData.length > 0) {
+        const firstDir = directorsData[0]
+        const dirSlug = slugify(firstDir.name)
+        if (dirSlug) {
+          const existingAuthor = await prisma.authors.findUnique({ where: { slug: dirSlug } })
+          if (existingAuthor) {
+            authorId = existingAuthor.id
           } else {
-            logger.warn(`Genre not found in DB: "${genreName}" (${slug}) - Please crawl category-sitemap.xml first`)
+            const newAuthor = await prisma.authors.create({
+              data: {
+                name: firstDir.name,
+                slug: dirSlug,
+                sourceUrl: firstDir.url,
+              }
+            })
+            authorId = newAuthor.id
           }
         }
+      }
+
+      // Process actors
+      const actorIds: string[] = []
+      for (const actorData of actorsData) {
+        const actorSlug = slugify(actorData.name)
+        if (!actorSlug) continue
+        const actorId = await actorRepository.findOrCreate(actorData.name, actorSlug, actorData.url)
+        actorIds.push(actorId)
+      }
+
+      // Process tags (keywords)
+      const tagIds: string[] = []
+      for (const keyword of keywordsData) {
+        const tSlug = slugify(keyword)
+        if (!tSlug) continue
+        const tagId = await tagRepository.findOrCreate(keyword, tSlug)
+        tagIds.push(tagId)
       }
 
       // Save to DB
       const story = await storyRepository.upsert({
         ...normalized,
+        authorId,
         genreIds,
+        actorIds,
+        tagIds,
       })
 
       // Parse và lưu Episodes (Chapters)
@@ -256,6 +311,11 @@ class StoryService {
         story_genres: {
           include: {
             genres: true,
+          },
+        },
+        story_actors: {
+          include: {
+            actors: true,
           },
         },
       },

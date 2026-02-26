@@ -12,7 +12,7 @@ export interface IStory {
   genreIds?: string[]
   
   // New detailed fields
-  releaseYear?: string
+  releaseYear?: number
   director?: string
   cast?: string
   duration?: string

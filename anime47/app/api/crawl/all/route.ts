@@ -53,9 +53,8 @@ export async function POST(request: Request) {
       await storyService.crawlStories(storyUrls)
     }
 
-    // TODO: Crawl chapters, authors
-    // Cần crawl authors trước, sau đó mới crawl stories với mapping
-    // Sau đó crawl chapters
+    // Authors, actors, tags, and chapters are now crawled automatically
+    // per story in storyService.crawlStoryDetail()
 
     return NextResponse.json({
       success: true,

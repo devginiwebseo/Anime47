@@ -30,6 +30,7 @@ class StoryMapper {
         duration: cleanText(raw.duration),
         quality: cleanText(raw.quality),
         language: cleanText(raw.language),
+        keywords: cleanText(raw.keywords),
         
         // Meta JSON - Lưu TOÀN BỘ raw data (không mất dữ liệu)
         metaJson: raw as any, // Store raw data exactly as crawled

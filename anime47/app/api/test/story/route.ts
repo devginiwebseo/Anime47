@@ -72,7 +72,7 @@ export async function POST(request: Request) {
     }
 
     // Parse table info
-    $('.movie-info-table tr').each((_, row) => {
+    $('.movie-info-table tr').each((_: number, row: any) => {
       const $row = $(row)
       const headerText = $row.find('th').text().trim()
       const $td = $row.find('td')
@@ -81,24 +81,24 @@ export async function POST(request: Request) {
         rawData.releaseYear = $td.find('a').text().trim() || $td.text().trim()
       }
       else if (headerText.includes('Đạo diễn')) {
-        rawData.director = $td.find('a').map((_, el) => $(el).text().trim()).get()
+        rawData.director = $td.find('a').map((_: number, el: any) => $(el).text().trim()).get()
       }
       else if (headerText.includes('Diễn viên')) {
-        rawData.cast = $td.find('a').map((_, el) => $(el).text().trim()).get()
+        rawData.cast = $td.find('a').map((_: number, el: any) => $(el).text().trim()).get()
       }
       else if (headerText.includes('Thể loại')) {
-        rawData.genres = $td.find('a').map((_, el) => ({
+        rawData.genres = $td.find('a').map((_: number, el: any) => ({
           name: $(el).text().trim(),
           url: $(el).attr('href')
         })).get()
       }
       else if (headerText.includes('Từ khóa')) {
-        rawData.keywords = $td.find('a').map((_, el) => $(el).text().trim()).get()
+        rawData.keywords = $td.find('a').map((_: number, el: any) => $(el).text().trim()).get()
       }
     })
 
     // Quality & Language từ stats
-    $('.movie-info__stats .stat-item').each((_, el) => {
+    $('.movie-info__stats .stat-item').each((_: number, el: any) => {
       const $el = $(el)
       const text = $el.find('span').text().trim()
       
@@ -123,7 +123,7 @@ export async function POST(request: Request) {
     }
 
     // Episodes
-    rawData.episodes = $('.episodes-grid a.episode-item').map((_, el) => ({
+    rawData.episodes = $('.episodes-grid a.episode-item').map((_: number, el: any) => ({
       title: $(el).find('.episode-number').text().trim(),
       url: $(el).attr('href')
     })).get()

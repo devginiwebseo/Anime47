@@ -4,14 +4,14 @@ import { IAuthor } from '@/types/common.types'
 
 class AuthorRepository {
   async findBySlug(slug: string) {
-    return prisma.author.findUnique({
+    return prisma.authors.findUnique({
       where: { slug },
     })
   }
 
   async upsert(data: IAuthor) {
     try {
-      const author = await prisma.author.upsert({
+      const author = await prisma.authors.upsert({
         where: { slug: data.slug },
         create: data,
         update: {

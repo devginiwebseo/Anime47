@@ -5,18 +5,44 @@ import { logger } from '@/lib/logger'
 import crypto from 'crypto'
 
 class ImageService {
-  private uploadDir = path.join(process.cwd(), 'public', 'upload', 'image')
+  private baseUploadDir = path.join(process.cwd(), 'public', 'upload', 'image')
 
   constructor() {
-    // Tạo thư mục nếu chưa tồn tại
-    if (!fs.existsSync(this.uploadDir)) {
-      fs.mkdirSync(this.uploadDir, { recursive: true })
+    // Tạo thư mục gốc nếu chưa tồn tại
+    if (!fs.existsSync(this.baseUploadDir)) {
+      fs.mkdirSync(this.baseUploadDir, { recursive: true })
     }
   }
 
   /**
-   * Download ảnh từ URL và lưu vào local
-   * @returns Local URL path (e.g., /upload/image/abc123.webp)
+   * Lấy thư mục upload theo tháng hiện tại (e.g., 02/2026)
+   */
+  private getMonthlyDir(): string {
+    const now = new Date()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const year = String(now.getFullYear())
+    const monthlyDir = path.join(this.baseUploadDir, month, year)
+
+    if (!fs.existsSync(monthlyDir)) {
+      fs.mkdirSync(monthlyDir, { recursive: true })
+    }
+
+    return monthlyDir
+  }
+
+  /**
+   * Lấy relative URL path theo tháng hiện tại
+   */
+  private getMonthlyUrlPath(): string {
+    const now = new Date()
+    const month = String(now.getMonth() + 1).padStart(2, '0')
+    const year = String(now.getFullYear())
+    return `/upload/image/${month}/${year}`
+  }
+
+  /**
+   * Download ảnh từ URL và lưu vào local (phân theo tháng)
+   * @returns Local URL path (e.g., /upload/image/02/2026/abc123.webp)
    */
   async downloadImage(imageUrl: string): Promise<string | null> {
     try {
@@ -25,33 +51,63 @@ class ImageService {
         return null
       }
 
+      // Kiểm tra xem ảnh đã tải trước đó chưa (tìm ở tất cả thư mục)
+      const hash = crypto.createHash('md5').update(imageUrl).digest('hex')
+      const ext = this.getExtension(imageUrl)
+      const filename = `${hash}${ext}`
+
+      // Kiểm tra ở thư mục gốc cũ (backward compatibility)
+      const oldFilepath = path.join(this.baseUploadDir, filename)
+      if (fs.existsSync(oldFilepath)) {
+        const localUrl = `/upload/image/${filename}`
+        logger.info(`Image already exists (legacy): ${localUrl}`)
+        return localUrl
+      }
+
+      // Kiểm tra ở thư mục tháng hiện tại
+      const monthlyDir = this.getMonthlyDir()
+      const monthlyFilepath = path.join(monthlyDir, filename)
+      if (fs.existsSync(monthlyFilepath)) {
+        const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
+        logger.info(`Image already exists: ${localUrl}`)
+        return localUrl
+      }
+
       logger.info(`Downloading image: ${imageUrl}`)
 
       // Download image
       const response = await axios.get(imageUrl, {
         responseType: 'arraybuffer',
-        timeout: 10000,
+        timeout: 15000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          'Referer': 'https://anime47.onl/',
         },
       })
 
-      // Generate filename từ hash
-      const hash = crypto.createHash('md5').update(imageUrl).digest('hex')
-      const ext = path.extname(new URL(imageUrl).pathname) || '.webp'
-      const filename = `${hash}${ext}`
-      const filepath = path.join(this.uploadDir, filename)
+      // Lưu vào thư mục theo tháng
+      fs.writeFileSync(monthlyFilepath, response.data)
 
-      // Save to disk
-      fs.writeFileSync(filepath, response.data)
-
-      const localUrl = `/upload/image/${filename}`
+      const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
       logger.success(`Image saved: ${localUrl}`)
 
       return localUrl
     } catch (error: any) {
       logger.error(`Failed to download image: ${imageUrl}`, error)
       return null // Trả về null để dùng URL gốc
+    }
+  }
+
+  /**
+   * Lấy extension từ URL
+   */
+  private getExtension(imageUrl: string): string {
+    try {
+      const urlPath = new URL(imageUrl).pathname
+      const ext = path.extname(urlPath)
+      return ext || '.webp'
+    } catch {
+      return '.webp'
     }
   }
 

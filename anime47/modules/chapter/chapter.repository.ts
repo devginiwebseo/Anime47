@@ -4,7 +4,7 @@ import { IChapter } from '@/types/chapter.types'
 
 class ChapterRepository {
   async findBySlug(storyId: string, slug: string) {
-    return prisma.chapter.findUnique({
+    return prisma.chapters.findUnique({
       where: {
         storyId_slug: {
           storyId,
@@ -16,7 +16,7 @@ class ChapterRepository {
 
   async upsert(data: IChapter) {
     try {
-      const chapter = await prisma.chapter.upsert({
+      const chapter = await prisma.chapters.upsert({
         where: {
           storyId_slug: {
             storyId: data.storyId,
@@ -42,14 +42,14 @@ class ChapterRepository {
   }
 
   async findByStory(storyId: string) {
-    return prisma.chapter.findMany({
+    return prisma.chapters.findMany({
       where: { storyId },
       orderBy: { index: 'asc' },
     })
   }
 
   async count() {
-    return prisma.chapter.count()
+    return prisma.chapters.count()
   }
 }
 
