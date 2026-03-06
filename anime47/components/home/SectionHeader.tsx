@@ -3,28 +3,16 @@ import Link from 'next/link';
 
 interface SectionHeaderProps {
     title: string;
-    href?: string;
     icon?: string;
 }
 
-export default function SectionHeader({ title, href, icon = '📺' }: SectionHeaderProps) {
+export default function SectionHeader({ title, icon = '📺' }: SectionHeaderProps) {
     return (
-        <div className="flex items-center justify-between mb-6 pb-3 border-b-2 border-primary">
-            <h2 className="text-2xl font-bold text-primary uppercase tracking-wide flex items-center gap-2">
-                <span>{icon}</span>
+        <div className="relative mb-8 pb-2">
+            <h2 className="w-full text-xl md:text-2xl font-black text-primary uppercase tracking-wider inline-block relative">
                 {title}
+                <div className="absolute -bottom-[10px] left-0 w-full h-[2px] bg-primary"></div>
             </h2>
-            {href && (
-                <Link
-                    href={href}
-                    className="text-gray-400 hover:text-primary transition-colors text-sm font-medium flex items-center gap-1"
-                >
-                    Xem tất cả
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                </Link>
-            )}
         </div>
     );
 }

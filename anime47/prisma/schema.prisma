@@ -14,12 +14,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -42,15 +42,16 @@ model actors {
 }
 
 model authors {
-  id        String    @id @default(cuid())
-  name      String
-  slug      String    @unique
-  bio       String?
-  avatarUrl String?
-  sourceUrl String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  stories   stories[]
+  id            String          @id @default(cuid())
+  name          String
+  slug          String          @unique
+  bio           String?
+  avatarUrl     String?
+  sourceUrl     String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  stories       stories[]
+  story_authors story_authors[]
 
   @@index([slug])
 }
@@ -83,14 +84,14 @@ model comments {
   id        String   @id @default(cuid())
   storyId   String
   author    String
-  email     String?
   content   String
   userIp    String?
   rating    Int?
-  status    String   @default("PENDING") // PENDING, APPROVED, REJECTED
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   userId    String?
+  email     String?
+  status    String   @default("PENDING")
   stories   stories  @relation(fields: [storyId], references: [id], onDelete: Cascade)
   users     User?    @relation(fields: [userId], references: [id])
 
@@ -253,12 +254,25 @@ model stories {
   reading_progress reading_progress[]
   authors          authors?           @relation(fields: [authorId], references: [id])
   story_actors     story_actors[]
+  story_authors    story_authors[]
   story_genres     story_genres[]
   story_tags       story_tags[]
 
   @@index([authorId])
   @@index([createdAt])
   @@index([slug])
+}
+
+model story_authors {
+  id       String  @id @default(cuid())
+  storyId  String
+  authorId String
+  authors  authors @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  stories  stories @relation(fields: [storyId], references: [id], onDelete: Cascade)
+
+  @@unique([storyId, authorId])
+  @@index([authorId])
+  @@index([storyId])
 }
 
 model story_actors {

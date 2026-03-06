@@ -23,6 +23,7 @@ export interface SiteSettings {
   theme: {
     primaryColor: string;
     backgroundColor: string;
+    isIndexed: boolean;
   };
 }
 
@@ -31,29 +32,20 @@ const defaultSettings: SiteSettings = {
     siteName: 'Anime47',
     logoUrl: '',
     showSearch: true,
-    menuItems: [
-        { label: 'Trang chủ', href: '/' },
-        { label: 'Phim mới', href: '/new' },
-        { label: 'Thể loại', href: '/genres' },
-    ],
+    menuItems: [],
     announcement: '',
   },
   footer: {
-    copyrightText: '© 2026 Anime47. All rights reserved.',
-    description: 'Anime47 - Trang web xem anime chất lượng cao với phụ đề Việt.',
-    socialLinks: [
-        { platform: 'facebook', url: '' },
-    ],
-    footerLinks: [
-        { label: 'Liên hệ', href: '/lien-he' },
-        { label: 'Điều khoản', href: '/dieu-khoan' },
-        { label: 'Riêng tư', href: '/chinh-sach-rieng-tu' },
-    ],
+    copyrightText: '',
+    description: '',
+    socialLinks: [],
+    footerLinks: [],
     showBackToTop: true,
   },
   theme: {
     primaryColor: '#d32f2f', // Default red
     backgroundColor: '#111827', // Default gray-900
+    isIndexed: false,
   }
 };
 

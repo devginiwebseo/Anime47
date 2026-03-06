@@ -36,9 +36,15 @@ export default async function AdminChaptersPage(props: {
 
     const totalPages = Math.ceil(total / limit);
 
+    const storiesList = await prisma.stories.findMany({
+        select: { id: true, title: true, slug: true },
+        orderBy: { title: 'asc' },
+    });
+
     return (
         <ChapterManager
             initialChapters={chapters as any}
+            storiesList={storiesList}
             total={total}
             page={page}
             totalPages={totalPages}

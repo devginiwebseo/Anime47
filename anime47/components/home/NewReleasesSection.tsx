@@ -1,12 +1,19 @@
 import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
+import SeeMoreButton from './SeeMoreButton';
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
-export default async function NewReleasesSection() {
+interface SectionProps {
+    title: string;
+    limit?: number;
+    numColumns?: number;
+}
+
+export default async function NewReleasesSection({ title, limit = 20, numColumns = 5 }: SectionProps) {
     // Lấy 20 stories mới nhất từ database
-    const stories = await storyService.getLatestStories(20);
+    const stories = await storyService.getLatestStories(limit);
 
     // Lấy thông tin số tập cho mỗi story
     const animeData = await Promise.all(
@@ -24,19 +31,23 @@ export default async function NewReleasesSection() {
                 totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
                 currentEpisode: latestChapter?.index || undefined,
                 isNew: true, // Stories mới nhất
+                views: story.views || 0,
             };
         })
     );
 
     return (
         <section className="mb-12">
-            <SectionHeader title="Mới Cập Nhật" href="/anime-bo" icon="🆕" />
+            <SectionHeader title={title} icon="🆕" />
 
             {animeData.length > 0 ? (
-                <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-                    {animeData.map((anime) => (
-                        <AnimeCard key={anime.id} {...anime} />
-                    ))}
+                <div className="space-y-6">
+                    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-x-4 gap-y-8`}>
+                        {animeData.map((anime) => (
+                            <AnimeCard key={anime.id} {...anime} />
+                        ))}
+                    </div>
+                    <SeeMoreButton href="/anime-bo" />
                 </div>
             ) : (
                 <div className="text-center py-12 text-gray-400">

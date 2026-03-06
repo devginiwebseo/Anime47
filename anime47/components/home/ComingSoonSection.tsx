@@ -1,13 +1,20 @@
 import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
+import SeeMoreButton from './SeeMoreButton';
 
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
-export default async function ComingSoonSection() {
+interface SectionProps {
+    title: string;
+    limit?: number;
+    numColumns?: number;
+}
+
+export default async function ComingSoonSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
     // Lấy stories sắp chiếu từ database
-    const stories = await storyService.getUpcomingStories(8);
+    const stories = await storyService.getUpcomingStories(limit);
 
     if (stories.length === 0) {
         return null; // Ẩn section nếu không có data
@@ -35,12 +42,15 @@ export default async function ComingSoonSection() {
 
     return (
         <section className="mb-12">
-            <SectionHeader title="Sắp Chiếu" href="/sap-chieu" icon="🎬" />
+            <SectionHeader title={title} icon="🎬" />
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {animeData.map((anime) => (
-                    <AnimeCard key={anime.id} {...anime} />
-                ))}
+            <div className="space-y-4">
+                <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-4`}>
+                    {animeData.map((anime) => (
+                        <AnimeCard key={anime.id} {...anime} />
+                    ))}
+                </div>
+                <SeeMoreButton href="/sap-chieu" />
             </div>
         </section>
     );

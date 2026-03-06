@@ -12,6 +12,7 @@ interface AnimeCardProps {
     totalEpisodes?: number;
     currentEpisode?: number;
     isNew?: boolean;
+    views?: number;
 }
 
 export default function AnimeCard({
@@ -24,12 +25,15 @@ export default function AnimeCard({
     totalEpisodes,
     currentEpisode,
     isNew = false,
+    views = 0,
 }: AnimeCardProps) {
+    const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
+
     return (
-        <Link href={`/anime/${slug}`}>
-            <div className="group relative bg-gray-800 rounded-lg overflow-hidden shadow-lg hover:shadow-primary/50 transition-all duration-300 hover:scale-105 cursor-pointer">
+        <Link href={`/anime/${slug}`} className="group block">
+            <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
                 {/* Cover Image */}
-                <div className="aspect-[2/3] relative bg-gradient-to-br from-gray-700 to-gray-900">
+                <div className="aspect-[2/3] relative bg-[#1c1d22]">
                     {coverImage ? (
                         <Image
                             src={coverImage}
@@ -37,6 +41,7 @@ export default function AnimeCard({
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+                            priority
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
@@ -44,47 +49,45 @@ export default function AnimeCard({
                         </div>
                     )}
 
-                    {/* Overlay badges */}
-                    <div className="absolute top-2 left-2 flex flex-col gap-1">
-                        {rating && (
-                            <div className="bg-black/80 backdrop-blur-sm text-yellow-400 px-2 py-1 rounded text-xs font-bold flex items-center gap-1">
-                                ⭐ {rating}
-                            </div>
-                        )}
-                        {isNew && (
-                            <div className="bg-primary text-white px-2 py-1 rounded text-xs font-bold animate-pulse">
-                                MỚI
+                    {/* Gradient Overlay for bottom text */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
+
+                    {/* Badges TOP */}
+                    <div className="absolute top-2 left-2 right-2 flex justify-between items-start">
+                        {/* Star Rating Top Left */}
+                        <div className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold border border-white/10">
+                            <span className="text-yellow-400">★</span>
+                            {rating.toFixed(1)}
+                        </div>
+
+                        {/* Status/Episode Top Right */}
+                        {statusText && (
+                            <div className="bg-primary text-white px-2 py-0.5 rounded text-[10px] font-bold shadow-lg uppercase">
+                                {statusText}
                             </div>
                         )}
                     </div>
 
-                    <div className="absolute top-2 right-2">
-                        <div className="bg-primary text-white px-2 py-1 rounded text-xs font-bold">
+                    {/* Badges BOTTOM */}
+                    <div className="absolute bottom-2 left-2 right-2 flex justify-between items-end">
+                        {/* Quality Bottom Left */}
+                        <div className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/10 uppercase">
                             {quality}
                         </div>
-                    </div>
 
-                    {/* Episode info */}
-                    {currentEpisode && (
-                        <div className="absolute bottom-2 left-2 right-2">
-                            <div className="bg-black/80 backdrop-blur-sm text-white px-2 py-1 rounded text-xs">
-                                {totalEpisodes
-                                    ? `Tập ${currentEpisode}/${totalEpisodes}`
-                                    : `Lượt xem: ${currentEpisode}k`
-                                }
-                            </div>
+                        {/* Views Bottom Right */}
+                        <div className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/10 whitespace-nowrap">
+                            Lượt xem: {views > 999 ? `${(views / 1000).toFixed(1)}K` : views}
                         </div>
-                    )}
-
-
+                    </div>
                 </div>
+            </div>
 
-                {/* Title */}
-                <div className="p-3">
-                    <h3 className="text-white font-bold text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                        {title}
-                    </h3>
-                </div>
+            {/* Title below image */}
+            <div className="mt-3 px-0.5">
+                <h3 className="text-gray-100 font-bold text-[15px] leading-tight line-clamp-2 group-hover:text-primary transition-colors">
+                    {title}
+                </h3>
             </div>
         </Link>
     );

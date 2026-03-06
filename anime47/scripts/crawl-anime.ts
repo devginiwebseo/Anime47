@@ -264,10 +264,23 @@ const colors = {
   reset: '\x1b[0m',
 }
 
+const LOG_FILE = path.join(process.cwd(), 'crawl.log');
+
 function log(level: 'info' | 'warn' | 'error' | 'success', message: string) {
   const timestamp = new Date().toISOString()
   const color = colors[level]
-  console.log(`${color}${timestamp} [${level.toUpperCase()}]${colors.reset} ${message}`)
+  const consoleMsg = `${color}${timestamp} [${level.toUpperCase()}]${colors.reset} ${message}`;
+
+  console.log(consoleMsg);
+
+  if (level === 'error') {
+    const fileMsg = `${timestamp} [${level.toUpperCase()}] ${message}\n`;
+    try {
+      fs.appendFileSync(LOG_FILE, fileMsg);
+    } catch (e) {
+      console.error(`Failed to write to log file:`, e);
+    }
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -403,6 +416,14 @@ async function crawlAnimeDetail(url: string): Promise<void> {
       return
     }
 
+    // Check title against blacklist (gambling, spam)
+    const blacklist = ['rikvip', 'hitclub', 'game bài', 'cá cược', 'cá độ', 'nhà cái', 'link vào', 'giới thiệu rikvip', 'giới thiệu hitclub', 'nổ hũ', 'bắn cá', 'tài xỉu', 'soi cầu']
+    const isBlacklisted = blacklist.some(word => title.toLowerCase().includes(word))
+    if (isBlacklisted) {
+      log('warn', `Skipping blacklisted content: ${title}`)
+      return
+    }
+
     const alternativeName = $('h2.movie-original-title').text().trim()
     
     // ─── Description ───
@@ -491,6 +512,20 @@ async function crawlAnimeDetail(url: string): Promise<void> {
         episodes.push({ title: epTitle, url: epUrl })
       }
     })
+
+    // ─── Filter missing content ───
+    if (!coverImageUrl && episodes.length === 0) {
+      log('warn', `Skipping empty record (no image & no video): ${title}`)
+      return
+    }
+    
+    // Check if image is obviously broken/placeholder
+    if (coverImageUrl && (coverImageUrl.includes('placeholder') || coverImageUrl.includes('default'))) {
+      if (episodes.length === 0) {
+          log('warn', `Skipping record with placeholder image and no video: ${title}`)
+          return
+      }
+    }
 
     const rawData: AnimeDetailRaw = {
       title,

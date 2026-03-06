@@ -11,6 +11,9 @@ interface SettingsFormProps {
 interface ThemeSettings {
     primaryColor: string;
     backgroundColor: string;
+    isIndexed?: boolean;
+    siteTitle?: string;
+    faviconUrl?: string;
 }
 
 interface HeaderSettings {
@@ -75,7 +78,7 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
         }
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'favicon') => {
         const file = e.target.files?.[0];
         if (!file) return;
 
@@ -89,9 +92,13 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
             });
             const data = await res.json();
             if (data.url) {
-                setHeader({ ...header, logoUrl: data.url });
+                if (type === 'logo') {
+                    setHeader({ ...header, logoUrl: data.url });
+                } else {
+                    setTheme({ ...theme, faviconUrl: data.url });
+                }
             } else {
-                alert('Tải ảnh thất bại: ' + data.error);
+                alert('Tải ảnh thất bại: ' + (data.error || 'Lỗi không xác định'));
             }
         } catch (error) {
             alert('Lỗi tải ảnh');
@@ -169,7 +176,7 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                     onClick={() => setActiveTab('theme')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                    🎨 Giao Diện
+                    ⚙️ Cài đặt trang web
                 </button>
             </div>
 
@@ -189,7 +196,7 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                                 <input value={header.logoUrl} onChange={(e) => setHeader({ ...header, logoUrl: e.target.value })} className={inputClass} placeholder="https://..." />
                                 <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition">
                                     Tải Ảnh
-                                    <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} />
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'logo')} />
                                 </label>
                             </div>
                             {header.logoUrl && (
@@ -321,9 +328,32 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
             {/* Theme Settings */}
             {activeTab === 'theme' && (
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 md:p-8 space-y-6">
-                    <h2 className="text-lg font-bold text-slate-800">Cài đặt Giao Diện (Theme)</h2>
+                    <h2 className="text-lg font-bold text-slate-800">Cài đặt Trang web & Giao diện</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className={labelClass}>Tiêu đề Website (SEO Title)</label>
+                            <input value={theme.siteTitle || ''} onChange={(e) => setTheme({ ...theme, siteTitle: e.target.value })} className={inputClass} placeholder="Anime47 - Xem Phim Online Miễn Phí" />
+                            <p className="text-xs text-slate-500 mt-2">Hiển thị trên tab trình duyệt và kết quả tìm kiếm Google.</p>
+                        </div>
+                        <div>
+                            <label className={labelClass}>Favicon URL (Biểu tượng web)</label>
+                            <div className="flex gap-2 items-center">
+                                <input value={theme.faviconUrl || ''} onChange={(e) => setTheme({ ...theme, faviconUrl: e.target.value })} className={inputClass} placeholder="https://.../favicon.ico" />
+                                <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+                                    Tải Ảnh
+                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'favicon')} />
+                                </label>
+                            </div>
+                            {theme.faviconUrl && (
+                                <div className="mt-2 bg-slate-50 border border-dashed p-2 rounded w-fit">
+                                    <img src={theme.faviconUrl} alt="Favicon" className="h-8 w-8 object-contain" />
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 border-t border-slate-100">
                         <div>
                             <label className={labelClass}>Màu Chủ Đạo (Primary Color)</label>
                             <div className="flex items-center gap-3">
@@ -339,6 +369,20 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                                 <input value={theme.backgroundColor} onChange={(e) => setTheme({ ...theme, backgroundColor: e.target.value })} className={inputClass} placeholder="#111827" />
                             </div>
                             <p className="text-xs text-slate-500 mt-2">Dùng làm màu nền cho thanh Header và khu vực Footer.</p>
+                        </div>
+                    </div>
+
+                    <div className="pt-4 border-t border-slate-200">
+                        <label className={labelClass}>Cho phép Bot Index Website (SEO)</label>
+                        <div className="flex items-center gap-3 mt-2">
+                            <input
+                                type="checkbox"
+                                id="isIndexed"
+                                checked={theme.isIndexed ?? false}
+                                onChange={(e) => setTheme({ ...theme, isIndexed: e.target.checked })}
+                                className="w-4 h-4 text-blue-600 rounded cursor-pointer"
+                            />
+                            <label htmlFor="isIndexed" className="text-sm text-slate-700 font-medium cursor-pointer">Cho phép các công cụ tìm kiếm (Google, Bing...) index website của bạn (bật/tắt thẻ robots index, follow)</label>
                         </div>
                     </div>
                 </div>

@@ -261,7 +261,7 @@ export default function MovieManager({ initialMovies, total, page, totalPages, q
                                         <input type="hidden" name="coverImage" value={coverImageUrl} />
                                         <div className="flex-1 relative">
                                             <input
-                                                type="url"
+                                                type="text"
                                                 placeholder="Link ảnh hoặc tải lên..."
                                                 value={coverImageUrl}
                                                 onChange={(e) => setCoverImageUrl(e.target.value)}

@@ -1,13 +1,20 @@
 import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
+import SeeMoreButton from './SeeMoreButton';
 
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
-export default async function RecommendedSection() {
+interface SectionProps {
+    title: string;
+    limit?: number;
+    numColumns?: number;
+}
+
+export default async function RecommendedSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
     // Lấy stories hot/đề cử từ database
-    const stories = await storyService.getHotStories(8);
+    const stories = await storyService.getHotStories(limit);
 
     if (stories.length === 0) {
         return null;
@@ -35,12 +42,15 @@ export default async function RecommendedSection() {
 
     return (
         <section className="mb-12">
-            <SectionHeader title="Đề Cử" href="/de-cu" icon="⭐" />
+            <SectionHeader title={title} icon="⭐" />
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                {animeData.map((anime) => (
-                    <AnimeCard key={anime.id} {...anime} />
-                ))}
+            <div className="space-y-4">
+                <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-4`}>
+                    {animeData.map((anime) => (
+                        <AnimeCard key={anime.id} {...anime} />
+                    ))}
+                </div>
+                <SeeMoreButton href="/de-cu" />
             </div>
         </section>
     );

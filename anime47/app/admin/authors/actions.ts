@@ -7,6 +7,7 @@ import { slugify } from '@/lib/helpers'
 export async function createAuthor(formData: FormData) {
     const name = formData.get('name') as string
     const bio = formData.get('bio') as string
+    const avatarUrl = formData.get('avatarUrl') as string
     const slug = slugify(name)
     const id = crypto.randomUUID()
 
@@ -16,6 +17,7 @@ export async function createAuthor(formData: FormData) {
             name,
             slug,
             bio,
+            avatarUrl,
             updatedAt: new Date()
         }
     })
@@ -26,6 +28,7 @@ export async function createAuthor(formData: FormData) {
 export async function updateAuthor(id: string, formData: FormData) {
     const name = formData.get('name') as string
     const bio = formData.get('bio') as string
+    const avatarUrl = formData.get('avatarUrl') as string
     const slug = slugify(name)
 
     await prisma.authors.update({
@@ -34,6 +37,7 @@ export async function updateAuthor(id: string, formData: FormData) {
             name,
             slug,
             bio,
+            avatarUrl,
             updatedAt: new Date()
         }
     })

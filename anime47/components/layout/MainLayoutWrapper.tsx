@@ -32,7 +32,7 @@ export default function MainLayoutWrapper({ children }: MainLayoutWrapperProps) 
                 }
             `}</style>
             <Header />
-            <main className="flex-1 w-full p-0  container mx-auto text-white py-6">{children}</main>
+            <main className="flex-1 w-full px-4 md:px-6 container mx-auto text-white py-6">{children}</main>
             <Footer />
         </div>
     );

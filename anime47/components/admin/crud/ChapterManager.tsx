@@ -15,22 +15,30 @@ type Chapter = {
     storyId: string
 }
 
-export default function ChapterManager({ initialChapters, total, page, totalPages, query }: {
-    initialChapters: Chapter[], total: number, page: number, totalPages: number, query: string
+export default function ChapterManager({ initialChapters, total, page, totalPages, query, storiesList }: {
+    initialChapters: Chapter[],
+    storiesList: { id: string, title: string, slug: string }[],
+    total: number,
+    page: number,
+    totalPages: number,
+    query: string
 }) {
     const [chapters, setChapters] = useState<Chapter[]>(initialChapters)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingChapter, setEditingChapter] = useState<Chapter | null>(null)
     const [loading, setLoading] = useState(false)
+    const [selectedStoryId, setSelectedStoryId] = useState('')
     const router = useRouter()
 
     const handleOpenModal = (chapter?: Chapter) => {
         setEditingChapter(chapter || null)
+        setSelectedStoryId(chapter?.storyId || '')
         setIsModalOpen(true)
     }
 
     const handleCloseModal = () => {
         setEditingChapter(null)
+        setSelectedStoryId('')
         setIsModalOpen(false)
     }
 
@@ -38,6 +46,11 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
         e.preventDefault()
         setLoading(true)
         const formData = new FormData(e.currentTarget)
+
+        // Ensure storyId is appended if we're using controlled selection
+        if (!editingChapter) {
+            formData.set('storyId', selectedStoryId)
+        }
 
         try {
             if (editingChapter) {
@@ -51,7 +64,7 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
                 window.location.reload()
             }, 500)
         } catch (error) {
-            alert('Có lỗi xảy ra, vui lòng đảm bảo bạn cung cấp đủ thông tin (đặc biệt là ID Phim khi tạo mới!).')
+            alert('Có lỗi xảy ra, vui lòng kiểm tra lại thông tin!')
         } finally {
             setLoading(false)
         }
@@ -163,18 +176,25 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
                             <button onClick={handleCloseModal} className="text-slate-400 hover:text-slate-600">✕</button>
                         </div>
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            {!editingChapter && (
-                                <div>
-                                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">ID Phim (Story ID) *</label>
-                                    <input
-                                        name="storyId"
-                                        required
-                                        placeholder="Nhập chuỗi ID của phim"
-                                        className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none font-mono text-sm"
-                                    />
-                                    <p className="text-xs text-slate-400 mt-1">Lưu ý: Bạn có thể tìm ID Phim trong bảng Phim hoặc trên thanh URL.</p>
-                                </div>
-                            )}
+                            <div>
+                                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Chọn Phim (Story) *</label>
+                                <select
+                                    name="storyId"
+                                    required
+                                    value={selectedStoryId}
+                                    onChange={(e) => setSelectedStoryId(e.target.value)}
+                                    disabled={!!editingChapter}
+                                    className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm bg-white"
+                                >
+                                    <option value="">-- Chọn Phim --</option>
+                                    {storiesList.map((story) => (
+                                        <option key={story.id} value={story.id}>
+                                            {story.title}
+                                        </option>
+                                    ))}
+                                </select>
+                                {editingChapter && <p className="text-xs text-slate-400 mt-1 italic">Không thể đổi phim của tập đã có sẵn.</p>}
+                            </div>
 
                             <div>
                                 <label className="block text-sm font-semibold text-slate-700 mb-1.5">Tiêu đề (VD: Tập 1) *</label>
@@ -182,7 +202,8 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
                                     name="title"
                                     defaultValue={editingChapter?.title}
                                     required
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    autoFocus
+                                    className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                 />
                             </div>
 
@@ -193,7 +214,7 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
                                     type="number"
                                     min="0"
                                     defaultValue={editingChapter?.index || 1}
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                 />
                             </div>
 
@@ -202,13 +223,14 @@ export default function ChapterManager({ initialChapters, total, page, totalPage
                                 <input
                                     name="videoUrl"
                                     defaultValue={editingChapter?.videoUrl || ''}
-                                    className="w-full px-4 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
+                                    placeholder="https://..."
+                                    className="w-full px-4 py-2.5 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                                 />
                             </div>
 
                             <div className="pt-4 flex justify-end gap-2 border-t border-slate-100 mt-6">
-                                <button type="button" onClick={handleCloseModal} className="px-5 py-2 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-xl">Hủy</button>
-                                <button type="submit" disabled={loading} className="px-5 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50">
+                                <button type="button" onClick={handleCloseModal} className="px-5 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-100 rounded-xl transition-colors">Hủy</button>
+                                <button type="submit" disabled={loading} className="px-6 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 transition-all shadow-md shadow-blue-500/20">
                                     {loading ? 'Đang lưu...' : 'Lưu lại'}
                                 </button>
                             </div>

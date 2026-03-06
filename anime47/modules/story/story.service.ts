@@ -32,6 +32,16 @@ class StoryService {
       const html = await httpService.fetchHtml(url)
       const $ = load(html)
 
+      const title = $('h1.movie-title-detail').text().trim()
+      
+      // 1. Check title against blacklist (gambling, spam)
+      const blacklist = ['rikvip', 'hitclub', 'game bài', 'cá cược', 'cá độ', 'nhà cái', 'link vào', 'giới thiệu rikvip', 'giới thiệu hitclub', 'nổ hũ', 'bắn cá', 'tài xỉu', 'soi cầu']
+      const isBlacklisted = blacklist.some(word => title.toLowerCase().includes(word))
+      if (isBlacklisted) {
+        logger.warn(`Skipping blacklisted trash content: ${title}`)
+        return
+      }
+
       // Parse raw data từ HTML
       const rawData: IStoryRaw = {
         // Basic Info
@@ -137,6 +147,24 @@ class StoryService {
         return
       }
 
+      // Parse và lưu Episodes (Chapters)
+      const episodes = $('.episodes-grid a.episode-item, .list-chapter a, .server-ep a').map((_, el) => {
+        const $el = $(el)
+        const title = $el.find('.episode-number').text().trim() || $el.text().trim()
+        const episodeUrl = $el.attr('href')
+        
+        return {
+          title: title || 'Unknown',
+          url: episodeUrl || '',
+        }
+      }).get()
+
+      // 2. Check for minimal content (Must have image OR episodes)
+      if (!localCoverUrl && episodes.length === 0) {
+        logger.warn(`Skipping record with no image and no video episodes: ${title}`)
+        return
+      }
+
       // Override coverImage và thumbnail với local URLs
       if (localCoverUrl) {
         normalized.coverImage = localCoverUrl
@@ -206,17 +234,6 @@ class StoryService {
       })
 
       // Parse và lưu Episodes (Chapters)
-      const episodes = $('.episodes-grid a.episode-item').map((_, el) => {
-        const $el = $(el)
-        const title = $el.find('.episode-number').text().trim()
-        const episodeUrl = $el.attr('href')
-        
-        return {
-          title: title || 'Unknown',
-          url: episodeUrl || '',
-        }
-      }).get()
-
       if (episodes.length > 0) {
         logger.info(`Found ${episodes.length} episodes for: ${normalized.title}`)
         

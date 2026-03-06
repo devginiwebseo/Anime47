@@ -113,6 +113,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 duration={story.duration || undefined}
                 language={story.language || undefined}
                 views={story.views || 0}
+                storyId={story.id}
             />
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -136,9 +137,8 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                     <CommentSection storyId={story.id} comments={comments} />
                 </div>
 
-                {/* Sidebar - 4 columns */}
                 <aside className="lg:col-span-4 space-y-6">
-                    <AnimeHotList />
+                    <AnimeHotList title="ANIME HOT" />
                     <RankingBoardWrapper />
                 </aside>
             </div>

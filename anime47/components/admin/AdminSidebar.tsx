@@ -29,7 +29,8 @@ const menuItems = [
     {
         group: "Hệ Thống", items: [
             { name: "Tài Khoản", href: "/admin/users" },
-            { name: "Cài Đặt", href: "/admin/settings" },
+            { name: "Cài Đặt Chung", href: "/admin/settings" },
+            { name: "Cài Đặt Trang Chủ", href: "/admin/settings/homepage" },
         ]
     },
 ];

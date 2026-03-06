@@ -5,6 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { slugify } from '@/lib/helpers';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useEffect } from 'react';
 
 interface AnimeDetailHeaderProps {
     title: string;
@@ -23,6 +24,7 @@ interface AnimeDetailHeaderProps {
     duration?: string;
     language?: string;
     views?: number;
+    storyId?: string;
 }
 
 export default function AnimeDetailHeader({
@@ -42,6 +44,7 @@ export default function AnimeDetailHeader({
     duration,
     language,
     views = 0,
+    storyId,
 }: AnimeDetailHeaderProps) {
     const handleShare = () => {
         if (typeof window !== 'undefined') {
@@ -56,6 +59,16 @@ export default function AnimeDetailHeader({
 
     const { settings } = useSiteSettings();
     const primaryColor = settings.theme.primaryColor || '#d32f2f';
+
+    useEffect(() => {
+        if (storyId) {
+            fetch('/api/anime/view', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ storyId }),
+            }).catch(err => console.error('Failed to increment view:', err));
+        }
+    }, [storyId]);
 
     return (
         <div className="bg-[#14151a] rounded-lg overflow-hidden border border-gray-800 p-6 md:p-8">
@@ -208,7 +221,7 @@ export default function AnimeDetailHeader({
                                 <span className={rating >= 10 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
                             </div>
                             <div className="text-[13px] font-bold text-gray-300 bg-[#2b2d35] px-4 py-1.5 rounded-full group-hover:text-white transition-colors border border-gray-700/50 tracking-wide">
-                                Lượt xem: {views > 0 ? views.toLocaleString('vi-VN') : (rating * 10 || 11)}
+                                Lượt xem: {views.toLocaleString('vi-VN')}
                             </div>
                         </a>
                     </div>

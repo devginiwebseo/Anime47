@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
         const buffer = Buffer.from(bytes);
 
         // Create upload directory
-        const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+        const uploadDir = path.join(process.cwd(), 'public', 'upload', 'logo');
         await mkdir(uploadDir, { recursive: true });
 
         // Generate unique filename
@@ -35,10 +35,12 @@ export async function POST(request: NextRequest) {
         const basename = path.basename(file.name, ext).replace(/[^a-zA-Z0-9-_]/g, '_');
         const filename = `${basename}_${Date.now()}${ext}`;
         const filePath = path.join(uploadDir, filename);
+        console.log(`Saving file to: ${filePath}`);
 
         await writeFile(filePath, buffer);
 
-        const url = `/uploads/${filename}`;
+        const url = `/upload/logo/${filename}`;
+        console.log(`File saved. Accessible at: ${url}`);
 
         return NextResponse.json({ success: true, url, filename });
     } catch (error: any) {
@@ -52,12 +54,12 @@ export async function DELETE(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const url = searchParams.get('url');
 
-        if (!url || !url.startsWith('/uploads/')) {
+        if (!url || !url.startsWith('/upload/logo/')) {
             return NextResponse.json({ error: 'Invalid URL for deletion' }, { status: 400 });
         }
 
         const filename = path.basename(url);
-        const filePath = path.join(process.cwd(), 'public', 'uploads', filename);
+        const filePath = path.join(process.cwd(), 'public', 'upload', 'logo', filename);
 
         try {
             await unlink(filePath);

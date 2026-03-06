@@ -84,49 +84,57 @@ export default async function WatchPage({ params }: WatchPageProps) {
     );
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 lg:container lg:mx-auto">
             {/* Video Player Section */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Content - 8 columns */}
                 <div className="lg:col-span-8 space-y-6">
                     {/* Navigation Controls */}
-                    <EpisodeNavigation
-                        animeTitle={story.title}
-                        animeSlug={story.slug}
-                        currentEpisode={currentEpisode}
-                        totalEpisodes={totalEpisodes}
-                        hasNextEpisode={hasNextEpisode}
-                        hasPrevEpisode={hasPrevEpisode}
-                    />
-
-                    {/* Video Player */}
-                    {videoUrl ? (
-                        <VideoPlayer
-                            videoUrl={videoUrl}
-                            title={`${story.title} - Tập ${currentEpisode}`}
+                    <div className="px-4 md:px-0">
+                        <EpisodeNavigation
+                            animeTitle={story.title}
                             animeSlug={story.slug}
                             currentEpisode={currentEpisode}
                             totalEpisodes={totalEpisodes}
+                            hasNextEpisode={hasNextEpisode}
+                            hasPrevEpisode={hasPrevEpisode}
                         />
-                    ) : (
-                        <div className="bg-gray-800 rounded-lg p-8 text-center">
-                            <p className="text-red-500 text-lg">Không có video</p>
-                            <p className="text-gray-400 mt-2">Hiện chưa có link xem cho tập này</p>
-                        </div>
-                    )}
+                    </div>
+
+                    {/* Video Player */}
+                    <div className="w-full">
+                        {videoUrl ? (
+                            <VideoPlayer
+                                videoUrl={videoUrl}
+                                title={`${story.title} - Tập ${currentEpisode}`}
+                                animeSlug={story.slug}
+                                currentEpisode={currentEpisode}
+                                totalEpisodes={totalEpisodes}
+                                storyId={story.id}
+                                poster={story.coverImage || undefined}
+                            />
+                        ) : (
+                            <div className="bg-gray-800 rounded-lg p-8 text-center mx-4 md:mx-0">
+                                <p className="text-red-500 text-lg">Không có video</p>
+                                <p className="text-gray-400 mt-2">Hiện chưa có link xem cho tập này</p>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Episode List */}
-                    <WatchEpisodeList
-                        animeSlug={story.slug}
-                        episodes={episodeList}
-                        currentEpisode={currentEpisode}
-                    />
+                    <div className="px-4 md:px-0">
+                        <WatchEpisodeList
+                            animeSlug={story.slug}
+                            episodes={episodeList}
+                            currentEpisode={currentEpisode}
+                        />
+                    </div>
                 </div>
 
                 {/* Sidebar - 4 columns */}
-                <aside className="lg:col-span-4 space-y-6">
+                <aside className="lg:col-span-4 space-y-6 px-4 md:px-0">
                     <WatchRelatedAnime animes={relatedAnimes} />
-                    <AnimeHotList />
+                    <AnimeHotList title="ANIME HOT" />
                     <RankingBoardWrapper />
                 </aside>
             </div>

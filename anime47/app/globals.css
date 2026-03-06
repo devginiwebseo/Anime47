@@ -33,3 +33,20 @@ body {
   margin-right: auto;
 }
 
+@layer utilities {
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px) translateX(-50%);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) translateX(-50%);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 0.15s ease-out forwards;
+  }
+}

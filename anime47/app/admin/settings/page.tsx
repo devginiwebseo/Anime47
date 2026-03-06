@@ -3,36 +3,7 @@ import SettingsForm from '@/components/admin/settings/SettingsForm';
 
 export const metadata = { title: 'Cài đặt Hệ Thống - Admin Panel' };
 
-const defaultHeaderSettings = {
-    siteName: 'Anime47',
-    logoUrl: '',
-    showSearch: true,
-    menuItems: [
-        { label: 'Trang chủ', href: '/' },
-        { label: 'Phim mới', href: '/new' },
-        { label: 'Thể loại', href: '/genres' },
-    ],
-    announcement: '',
-};
-
-const defaultFooterSettings = {
-    copyrightText: '© 2026 Anime47. All rights reserved.',
-    description: 'Anime47 - Trang web xem anime chất lượng cao với phụ đề Việt.',
-    socialLinks: [
-        { platform: 'facebook', url: '' },
-    ],
-    footerLinks: [
-        { label: 'Liên hệ', href: '/lien-he' },
-        { label: 'Điều khoản', href: '/dieu-khoan' },
-        { label: 'Riêng tư', href: '/chinh-sach-rieng-tu' },
-    ],
-    showBackToTop: true,
-};
-
-const defaultThemeSettings = {
-    primaryColor: '#d32f2f',
-    backgroundColor: '#111827',
-};
+// No hardcoded defaults here, rely on DB or empty state
 
 export default async function AdminSettingsPage() {
     // Lấy settings từ DB
@@ -42,17 +13,28 @@ export default async function AdminSettingsPage() {
         prisma.settings.findUnique({ where: { key: 'theme' } }),
     ]);
 
-    const headerSettings = headerSetting?.value
-        ? { ...defaultHeaderSettings, ...(headerSetting.value as any) }
-        : defaultHeaderSettings;
+    const headerSettings = (headerSetting?.value as any) || {
+        siteName: '',
+        logoUrl: '',
+        showSearch: true,
+        menuItems: [],
+        announcement: '',
+    };
 
-    const footerSettings = footerSetting?.value
-        ? { ...defaultFooterSettings, ...(footerSetting.value as any) }
-        : defaultFooterSettings;
+    const footerSettings = (footerSetting?.value as any) || {
+        copyrightText: '',
+        description: '',
+        socialLinks: [],
+        footerLinks: [],
+        showBackToTop: true,
+    };
 
-    const themeSettings = themeSetting?.value
-        ? { ...defaultThemeSettings, ...(themeSetting.value as any) }
-        : defaultThemeSettings;
+    const themeSettings = (themeSetting?.value as any) || {
+        primaryColor: '#d32f2f',
+        backgroundColor: '#111827',
+        siteTitle: '',
+        faviconUrl: '',
+    };
 
     return (
         <div className="space-y-6">

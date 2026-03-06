@@ -27,58 +27,45 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
     const startOfYear = new Date(now.getFullYear(), 0, 1);
 
     // Fetch stories cho mỗi khoảng thời gian
+    const fetchRanking = async (date?: Date) => {
+        let stories = await prisma.stories.findMany({
+            where: date ? { updatedAt: { gte: date } } : {},
+            orderBy: [
+                { views: 'desc' },
+                { rating: 'desc' },
+            ],
+            take: 10,
+            include: {
+                chapters: {
+                    orderBy: { index: 'desc' },
+                    take: 1,
+                },
+            },
+        });
+
+        // Fallback: Nếu không có phim nào update trong khoảng TG đó, lấy top views chung
+        if (stories.length === 0 && date) {
+            stories = await prisma.stories.findMany({
+                orderBy: [
+                    { views: 'desc' },
+                    { rating: 'desc' },
+                ],
+                take: 10,
+                include: {
+                    chapters: {
+                        orderBy: { index: 'desc' },
+                        take: 1,
+                    },
+                },
+            });
+        }
+        return stories;
+    };
+
     const [dailyStories, monthlyStories, yearlyStories] = await Promise.all([
-        // Hot ngày - stories cập nhật trong ngày, sắp xếp theo views
-        prisma.stories.findMany({
-            where: {
-                updatedAt: { gte: startOfDay },
-            },
-            orderBy: [
-                { views: 'desc' },
-                { rating: 'desc' },
-            ],
-            take: 10,
-            include: {
-                chapters: {
-                    orderBy: { index: 'desc' },
-                    take: 1,
-                },
-            },
-        }),
-        // Hot tháng
-        prisma.stories.findMany({
-            where: {
-                updatedAt: { gte: startOfMonth },
-            },
-            orderBy: [
-                { views: 'desc' },
-                { rating: 'desc' },
-            ],
-            take: 10,
-            include: {
-                chapters: {
-                    orderBy: { index: 'desc' },
-                    take: 1,
-                },
-            },
-        }),
-        // Hot năm
-        prisma.stories.findMany({
-            where: {
-                updatedAt: { gte: startOfYear },
-            },
-            orderBy: [
-                { views: 'desc' },
-                { rating: 'desc' },
-            ],
-            take: 10,
-            include: {
-                chapters: {
-                    orderBy: { index: 'desc' },
-                    take: 1,
-                },
-            },
-        }),
+        fetchRanking(startOfDay),
+        fetchRanking(startOfMonth),
+        fetchRanking(startOfYear),
     ]);
 
     // Format dữ liệu
@@ -112,8 +99,12 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
     };
 }
 
-export default async function RankingBoardWrapper() {
+interface RankingBoardWrapperProps {
+    title?: string;
+}
+
+export default async function RankingBoardWrapper({ title }: RankingBoardWrapperProps) {
     const rankingData = await getRankingData();
 
-    return <RankingBoard rankingData={rankingData} />;
+    return <RankingBoard rankingData={rankingData} title={title} />;
 }
