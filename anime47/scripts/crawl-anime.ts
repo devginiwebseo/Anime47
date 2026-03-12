@@ -1,14 +1,14 @@
 /**
  * Anime47 Crawler Script
  * 
- * Crawl anime data from anime47.onl via sitemaps
+ * Crawl anime data from anime47.tv via sitemaps
  * 
  * Sitemaps:
- *   - https://anime47.onl/sitemap_index.xml (index)
- *   - https://anime47.onl/category-sitemap.xml (genres/categories)
- *   - https://anime47.onl/post-sitemap1.xml (anime pages)
- *   - https://anime47.onl/post-sitemap2.xml
- *   - https://anime47.onl/post-sitemap3.xml
+ *   - https://anime47.tv/sitemap_index.xml (index)
+ *   - https://anime47.tv/category-sitemap.xml (genres/categories)
+ *   - https://anime47.tv/post-sitemap1.xml (anime pages)
+ *   - https://anime47.tv/post-sitemap2.xml
+ *   - https://anime47.tv/post-sitemap3.xml
  * 
  * Usage:
  *   npx tsx scripts/crawl-anime.ts                    # Full crawl
@@ -31,8 +31,8 @@ import crypto from 'crypto'
 // ═══════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  SITEMAP_INDEX_URL: 'https://anime47.onl/sitemap_index.xml',
-  SOURCE_DOMAIN: 'anime47.onl',
+  SITEMAP_INDEX_URL: 'https://anime47.tv/sitemap_index.xml',
+  SOURCE_DOMAIN: 'anime47.tv',
   
   DELAY_BETWEEN_REQUESTS: 1500,  // ms between story crawls
   DELAY_BETWEEN_GENRES: 500,     // ms between genre crawls
@@ -176,9 +176,16 @@ async function downloadImage(imageUrl: string): Promise<string | null> {
       responseType: 'arraybuffer',
       timeout: 15000,
       headers: {
-        'Referer': 'https://anime47.onl/',
+        'Referer': 'https://anime47.tv/',
       },
     })
+
+    // Verify we didn't get an HTML Cloudflare page or dummy wrapper
+    const contentType = response.headers['content-type'] || ''
+    if (contentType.includes('text/html')) {
+      log('error', `Failed to download image (Received HTML instead of image): ${imageUrl}`)
+      return null
+    }
 
     try {
       fs.writeFileSync(filepath, response.data)
@@ -554,7 +561,15 @@ async function crawlAnimeDetail(url: string): Promise<void> {
     // ─── Download cover image ───
     let localCoverUrl: string | null = null
     if (coverImageUrl) {
-      localCoverUrl = await downloadImage(coverImageUrl)
+      const existingStoryBySlug = await prisma.stories.findUnique({
+        where: { slug }
+      })
+
+      if (existingStoryBySlug?.coverImage && (existingStoryBySlug.coverImage.startsWith('/') || !existingStoryBySlug.coverImage.startsWith('http'))) {
+        localCoverUrl = existingStoryBySlug.coverImage;
+      } else {
+        localCoverUrl = await downloadImage(coverImageUrl)
+      }
     }
 
     // ─── Process Directors → authors table ───
@@ -928,7 +943,21 @@ async function main() {
     for (const url of chunk) {
       try {
         if (!CONFIG.FORCE_UPDATE) {
-          const exists = await prisma.stories.findFirst({ where: { sourceUrl: url } })
+          let urlPathname = url;
+          try {
+            const uObj = new URL(url);
+            urlPathname = uObj.pathname;
+            if (urlPathname.endsWith('/') && urlPathname.length > 1) {
+              urlPathname = urlPathname.slice(0, -1);
+            }
+          } catch {}
+
+          const exists = await prisma.stories.findFirst({ 
+            where: urlPathname.length > 5 
+              ? { sourceUrl: { contains: urlPathname } } 
+              : { sourceUrl: url }
+          })
+          
           if (exists) {
             // Nếu đã có trong DB, kiểm tra xem đã có ảnh local chưa
             // Nếu coverImage là null hoặc bắt đầu bằng http (remote), chúng ta sẽ không skip để nó thử tải lại ảnh

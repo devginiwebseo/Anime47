@@ -1,6 +1,6 @@
 export const config = {
   sitemap: {
-    indexUrl: process.env.SITEMAP_INDEX_URL || 'https://anime47.onl/sitemap_index.xml',
+    indexUrl: process.env.SITEMAP_INDEX_URL || 'https://anime47.tv/sitemap_index.xml',
   },
   crawler: {
     timeout: parseInt(process.env.CRAWLER_TIMEOUT || '10000'),
@@ -10,6 +10,6 @@ export const config = {
   },
   app: {
     domain: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
-    sourceDomain: 'https://anime47.onl', // Domain nguồn để replace
+    sourceDomain: 'https://anime47.tv', // Domain nguồn để replace
   },
 }

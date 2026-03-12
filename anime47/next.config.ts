@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'anime47.onl',
+        hostname: 'anime47.tv',
         port: '',
         pathname: '/**',
       },

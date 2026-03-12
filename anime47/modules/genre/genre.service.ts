@@ -7,7 +7,7 @@ import { prisma } from '@/lib/prisma'
 class GenreService {
   /**
    * Extract slug from URL
-   * Example: https://anime47.onl/hanh-dong/ → hanh-dong
+   * Example: https://anime47.tv/hanh-dong/ → hanh-dong
    */
   private extractSlugFromUrl(url: string): string {
     try {

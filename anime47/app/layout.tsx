@@ -39,7 +39,7 @@ export async function generateMetadata(): Promise<Metadata> {
         openGraph: {
             title: siteTitle,
             description: 'Xem anime vietsub miễn phí chất lượng cao tại Anime47',
-            url: 'https://anime47.onl',
+            url: 'https://anime47.tv',
             siteName: 'Anime47',
             locale: 'vi_VN',
             type: 'website',

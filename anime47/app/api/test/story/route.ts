@@ -44,7 +44,7 @@ export async function POST(request: Request) {
       }, { status: 500 })
     }
 
-    // Parse data theo cấu trúc thực tế của anime47.onl
+    // Parse data theo cấu trúc thực tế của anime47.tv
     const rawData: any = {
       url,
       

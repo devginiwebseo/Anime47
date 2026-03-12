@@ -81,7 +81,7 @@ class SitemapParser {
     }
     
     // If not any of above, assume it's a STORY (usually root URLs or /truyen/ paths)
-    // Example: https://anime47.onl/ikoku-nikki/ -> STORY
+    // Example: https://anime47.tv/ikoku-nikki/ -> STORY
     return SitemapType.STORY
   }
 

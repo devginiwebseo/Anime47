@@ -105,33 +105,40 @@ class ImageService {
         timeout: 15000,
         headers: {
           'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          'Referer': 'https://anime47.onl/',
+          'Referer': 'https://anime47.tv/',
         },
       })
 
-      // Lưu vào thư mục theo tháng
-      try {
-        fs.writeFileSync(monthlyFilepath, response.data)
-      } catch (writeErr: any) {
-        if (writeErr.code === 'EACCES') {
-          logger.error(`Permission denied: ${monthlyFilepath}. Please run 'sudo chown -R 777 public/upload' or similar on server.`)
-        }
-        throw writeErr
-      }
-
-      const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
-      logger.success(`Image saved: ${localUrl}`)
-
-      return localUrl
-    } catch (error: any) {
-      if (error.code === 'EACCES') {
-        logger.error(`Failed to download image due to permissions: ${imageUrl}`, error)
-      } else {
-        logger.error(`Failed to download image: ${imageUrl}`, error)
-      }
-      return null // Trả về null để dùng URL gốc
+    // Validate image type before saving
+    const contentType = response.headers['content-type'] || '';
+    if (contentType.includes('text/html')) {
+      logger.error(`Failed to download image: Received HTML page instead of image for ${imageUrl}`);
+      return null;
     }
+
+    // Save into monthly directory
+    try {
+      fs.writeFileSync(monthlyFilepath, response.data)
+    } catch (writeErr: any) {
+      if (writeErr.code === 'EACCES') {
+        logger.error(`Permission denied: ${monthlyFilepath}. Please run 'sudo chown -R 777 public/upload' or similar on server.`)
+      }
+      throw writeErr
+    }
+
+    const localUrl = `${this.getMonthlyUrlPath()}/${filename}`
+    logger.success(`Image saved: ${localUrl}`)
+
+    return localUrl
+  } catch (error: any) {
+    if (error.code === 'EACCES') {
+      logger.error(`Failed to download image due to permissions: ${imageUrl}`, error)
+    } else {
+      logger.error(`Failed to download image: ${imageUrl} - ${error.message}`)
+    }
+    return null // Return null to fall back to original remote URL
   }
+}
 
   /**
    * Lấy extension từ URL

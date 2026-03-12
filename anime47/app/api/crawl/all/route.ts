@@ -90,7 +90,7 @@ export async function GET() {
   return NextResponse.json({
     message: 'POST to this endpoint to start crawling all data',
     optional: {
-      indexUrl: 'Custom sitemap index URL (default: anime47.onl/sitemap_index.xml)',
+      indexUrl: 'Custom sitemap index URL (default: anime47.tv/sitemap_index.xml)',
     },
   })
 }
