@@ -1,7 +1,6 @@
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
-import MainLayoutWrapper from '@/components/layout/MainLayoutWrapper'
 import { AuthProvider } from '@/components/providers/AuthProvider'
 import { prisma } from '@/lib/prisma'
 
@@ -16,6 +15,7 @@ export async function generateMetadata(): Promise<Metadata> {
     let faviconUrl = '/favicon.ico';
 
     try {
+        console.log('--- DATABASE_URL Check ---', process.env.DATABASE_URL ? 'FOUND' : 'MISSING');
         const themeSetting = await prisma.settings.findUnique({ where: { key: 'theme' } });
         if (themeSetting && themeSetting.value) {
             const val = themeSetting.value as any;
@@ -60,7 +60,7 @@ export default function RootLayout({
         <html lang="vi" suppressHydrationWarning>
             <body className={inter.className} suppressHydrationWarning>
                 <AuthProvider>
-                    <MainLayoutWrapper>{children}</MainLayoutWrapper>
+                    {children}
                 </AuthProvider>
             </body>
         </html>
