@@ -12,15 +12,18 @@ interface SectionProps {
 }
 
 export default async function NewReleasesSection({ title, limit = 20, numColumns = 5 }: SectionProps) {
-    // Lấy 20 stories mới nhất từ database
-    const stories = await storyService.getLatestStories(limit);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    // Lấy stories mới nhất từ API
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}`, {
+        next: { revalidate: 3600 }
+    });
 
-    // Lấy thông tin số tập cho mỗi story
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
+    let animeData: any[] = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
+        animeData = stories.map((story: any) => {
             return {
                 id: story.id,
                 title: story.title,
@@ -28,13 +31,13 @@ export default async function NewReleasesSection({ title, limit = 20, numColumns
                 coverImage: story.coverImage || undefined,
                 rating: story.rating || undefined,
                 quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
+                totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+                currentEpisode: story.latestChapter?.index || undefined,
                 isNew: true, // Stories mới nhất
                 views: story.views || 0,
             };
-        })
-    );
+        });
+    }
 
     return (
         <section className="mb-12">
@@ -47,7 +50,7 @@ export default async function NewReleasesSection({ title, limit = 20, numColumns
                             <AnimeCard key={anime.id} {...anime} />
                         ))}
                     </div>
-                    <SeeMoreButton href="/anime-bo" />
+                    <SeeMoreButton href="/anime-bo"/>
                 </div>
             ) : (
                 <div className="text-center py-12 text-gray-400">

@@ -15,69 +15,41 @@ interface RankingAnime {
 }
 
 async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
-    const now = new Date();
-
-    // Ngày bắt đầu của ngày hôm nay
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-    // Ngày bắt đầu của tháng này
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-
-    // Ngày bắt đầu của năm này
-    const startOfYear = new Date(now.getFullYear(), 0, 1);
-
-    // Fetch stories cho mỗi khoảng thời gian
-    const fetchRanking = async (date?: Date) => {
-        let stories = await prisma.stories.findMany({
-            where: date ? { updatedAt: { gte: date } } : {},
-            orderBy: [
-                { views: 'desc' },
-                { rating: 'desc' },
-            ],
-            take: 10,
-            include: {
-                chapters: {
-                    orderBy: { index: 'desc' },
-                    take: 1,
-                },
-            },
-        });
-
-        // Fallback: Nếu không có phim nào update trong khoảng TG đó, lấy top views chung
-        if (stories.length === 0 && date) {
-            stories = await prisma.stories.findMany({
-                orderBy: [
-                    { views: 'desc' },
-                    { rating: 'desc' },
-                ],
-                take: 10,
-                include: {
-                    chapters: {
-                        orderBy: { index: 'desc' },
-                        take: 1,
-                    },
-                },
+    // Fetch stories cho mỗi khoảng thời gian qua API
+    const fetchRanking = async (period: 'day' | 'month' | 'year') => {
+        const apiUrl = process.env.API_URL || 'http://localhost:3000';
+        try {
+            const res = await fetch(`${apiUrl}/api/public/movies?limit=10&sort=views&period=${period}`, {
+                next: { revalidate: 3600 }
             });
+            if (res.ok) {
+                const data = await res.json();
+                return data.data || [];
+            }
+        } catch (error) {
+            console.error('Lỗi khi fetch ranking:', error);
         }
-        return stories;
+        return [];
     };
 
     const [dailyStories, monthlyStories, yearlyStories] = await Promise.all([
-        fetchRanking(startOfDay),
-        fetchRanking(startOfMonth),
-        fetchRanking(startOfYear),
+        fetchRanking('day'),
+        fetchRanking('month'),
+        fetchRanking('year'),
     ]);
 
     // Format dữ liệu
     const formatStories = (stories: any[]): RankingAnime[] => {
         return stories.map(story => {
-            const latestChapter = story.chapters[0];
+            const latestChapter = story.latestChapter;
             let episodes = 'Đang cập nhật';
 
             if (story.status === 'completed' || story.status === 'Hoàn thành') {
                 episodes = 'Full';
             } else if (latestChapter) {
-                episodes = `Tập ${latestChapter.index}`;
+                episodes = story.totalEpisodes > 0
+                    ? `Tập ${latestChapter.index}/${story.totalEpisodes}`
+                    : `Tập ${latestChapter.index}`;
             }
 
             return {

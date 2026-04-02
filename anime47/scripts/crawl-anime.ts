@@ -31,8 +31,8 @@ import crypto from 'crypto'
 // ═══════════════════════════════════════════════════════════════
 
 const CONFIG = {
-  SITEMAP_INDEX_URL: 'https://anime47.tv/sitemap_index.xml',
-  SOURCE_DOMAIN: 'anime47.tv',
+  SITEMAP_INDEX_URL: 'https://pezmoku.com/sitemap_index.xml',
+  SOURCE_DOMAIN: 'pezmoku.com',
   
   DELAY_BETWEEN_REQUESTS: 1500,  // ms between story crawls
   DELAY_BETWEEN_GENRES: 500,     // ms between genre crawls
@@ -67,7 +67,7 @@ const prisma = new PrismaClient({
 // DYNAMIC DOMAIN & HTTP CLIENT
 // ═══════════════════════════════════════════════════════════════
 
-let currentBaseUrl = 'https://anime47.tv';
+let currentBaseUrl = 'https://pezmoku.com';
 
 function normalizeUrl(url: string): string {
   if (!url) return url;
@@ -76,9 +76,8 @@ function normalizeUrl(url: string): string {
       return `${currentBaseUrl}${url}`;
     }
     const u = new URL(url);
-    if (u.hostname.includes('anime47')) {
-      return `${currentBaseUrl}${u.pathname}${u.search}${u.hash}`;
-    }
+    // Normalize any external URL belonging to the source family to the current detected base URL
+    return `${currentBaseUrl}${u.pathname}${u.search}${u.hash}`;
     return url;
   } catch {
     return url;
@@ -107,7 +106,7 @@ async function fetchWithRetry(originalUrl: string, retries = CONFIG.MAX_RETRIES)
         try {
           const finalUrl = new URL(finalUrlStr);
           const newBaseUrl = `${finalUrl.protocol}//${finalUrl.host}`;
-          if (newBaseUrl !== currentBaseUrl && finalUrl.hostname.includes('anime47')) {
+          if (newBaseUrl !== currentBaseUrl) {
             log('info', `🔄 Domain auto-updated via 301 redirect: ${currentBaseUrl} -> ${newBaseUrl}`);
             currentBaseUrl = newBaseUrl;
           }

@@ -12,33 +12,20 @@ interface SectionProps {
 }
 
 export default async function CompletedSection({ title, limit = 10, numColumns = 5 }: SectionProps) {
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
     // Lấy stories đã hoàn thành
-    const stories = await prisma.stories.findMany({
-        where: {
-            OR: [
-                { status: 'completed' },
-                { status: 'Hoàn thành' }
-            ]
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limit,
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            coverImage: true,
-            rating: true,
-            quality: true,
-        }
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&status=completed`, {
+        next: { revalidate: 3600 }
     });
 
-    if (stories.length === 0) return null;
+    let animeData: any[] = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
+        if (stories.length === 0) return null;
 
+        animeData = stories.map((story: any) => {
             return {
                 id: story.id,
                 title: story.title,
@@ -46,12 +33,14 @@ export default async function CompletedSection({ title, limit = 10, numColumns =
                 coverImage: story.coverImage || undefined,
                 rating: story.rating || undefined,
                 quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
+                totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+                currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
             };
-        })
-    );
+        });
+    } else {
+        return null;
+    }
 
     return (
         <section className="mb-12">

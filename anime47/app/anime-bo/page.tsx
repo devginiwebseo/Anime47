@@ -1,7 +1,5 @@
 import React from 'react';
-import { prisma } from '@/lib/prisma';
 import AnimeCard from '@/components/home/AnimeCard';
-import { chapterService } from '@/modules/chapter/chapter.service';
 import Pagination from '@/components/ui/Pagination';
 
 export const metadata = {
@@ -14,43 +12,41 @@ export default async function AnimeBoPage(props: {
 }) {
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
-    const pageSize = 20;
-    const skip = (currentPage - 1) * pageSize;
+    const limit = 20;
 
-    // Giả sử Anime Bộ là các phim có type hoặc số tập lớn hơn 1. 
-    // Tạm thời lấy tất cả stories kèm order mới nhất cho trang này.
-    const [stories, totalStories] = await Promise.all([
-        prisma.stories.findMany({
-            take: pageSize,
-            skip: skip,
-            orderBy: [
-                { createdAt: 'desc' },
-            ],
-        }),
-        prisma.stories.count()
-    ]);
+    // Call API để lấy data phim thay vì dùng prisma / database
+    // Sử dụng biến API_URL trong file .env
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&page=${currentPage}`, {
+        next: { revalidate: 60 } // Cache 60s
+    });
+    
+    let result = { success: false, data: [], pagination: { totalItems: 0, totalPages: 1 } };
+    if (res.ok) {
+        result = await res.json();
+    }
 
-    const totalPages = Math.ceil(totalStories / pageSize);
+    const stories = result.data || [];
+    // Giả sử API có trả về thông tin phân trang (pagination.totalItems)
+    // Nếu API của bạn chưa có, hãy bổ sung object pagination vào response!
+    const totalStories = result.pagination?.totalItems || stories.length;
+    const totalPages = result.pagination?.totalPages || Math.ceil(totalStories / limit);
 
-    // Lấy thông tin số tập cho mỗi story
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
-
-            return {
-                id: story.id,
-                title: story.title,
-                slug: story.slug,
-                coverImage: story.coverImage || undefined,
-                rating: story.rating || undefined,
-                quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
-                isNew: false,
-            };
-        })
-    );
+    // Xử lý data được trả về
+    const animeData = stories.map((story: any) => {
+        return {
+            id: story.id,
+            title: story.title,
+            slug: story.slug,
+            coverImage: story.coverImage || undefined,
+            rating: story.rating || undefined, // Đợi bạn bổ sung API
+            quality: story.quality || 'HD',
+            totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+            currentEpisode: story.latestChapter?.index || undefined,
+            isNew: false,
+            views: story.views || 0, // Đợi bạn bổ sung API
+        };
+    });
 
     return (
         <div className="space-y-6">
@@ -67,7 +63,7 @@ export default async function AnimeBoPage(props: {
             {stories.length > 0 ? (
                 <>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-                        {animeData.map((anime) => (
+                        {animeData.map((anime: any) => (
                             <AnimeCard key={anime.id} {...anime} />
                         ))}
                     </div>

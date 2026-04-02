@@ -6,8 +6,6 @@ import WatchEpisodeList from '@/components/watch/WatchEpisodeList';
 import WatchRelatedAnime from '@/components/watch/WatchRelatedAnime';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
-import { storyService } from '@/modules/story/story.service';
-import { chapterService } from '@/modules/chapter/chapter.service';
 
 interface WatchPageProps {
     params: Promise<{
@@ -25,22 +23,32 @@ export default async function WatchPage({ params }: WatchPageProps) {
         notFound();
     }
 
-    // Fetch anime data from database
-    const story = await storyService.getStoryBySlug(slug);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+
+    // Fetch story data từ API
+    const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
+        next: { revalidate: 3600 }
+    });
+
+    if (!res.ok) {
+        notFound();
+    }
+
+    const { data: story } = await res.json();
 
     if (!story) {
         notFound();
     }
 
-    // Fetch all chapters/episodes for this story
-    const chapters = await chapterService.getChaptersByStoryId(story.id);
+    // Fetch chapters/episodes từ property `chapters` của API
+    const chapters = story.chapters || [];
 
     if (!chapters || chapters.length === 0) {
         notFound();
     }
 
     // Find current episode
-    const currentChapter = chapters.find(ch => ch.index === episodeNumber);
+    const currentChapter = chapters.find((ch: any) => ch.index === episodeNumber);
 
     if (!currentChapter) {
         notFound();
@@ -59,29 +67,40 @@ export default async function WatchPage({ params }: WatchPageProps) {
     }
 
     // Format episodes for list
-    const episodeList = chapters.map(ch => ({
+    const episodeList = chapters.map((ch: any) => ({
         id: ch.id,
         number: ch.index,
         title: ch.title,
     }));
 
-    // Fetch related anime (same genre)
-    const relatedStoriesRaw = await storyService.getRelatedStories(story.id, 6);
-    const relatedAnimes = await Promise.all(
-        relatedStoriesRaw.map(async (s) => {
-            const totalEps = await chapterService.countChapters(s.id);
-            const latestChapter = await chapterService.getLatestChapter(s.id);
-            return {
+    // Fix relative URL for coverImage local
+    const formatImage = (url?: string) => {
+        if (url && url.includes('/upload/')) {
+            return url.substring(url.indexOf('/upload/'));
+        }
+        return url;
+    };
+    const formattedCover = formatImage(story.coverImage);
+
+    // Fetch related anime
+    let relatedAnimes: any[] = [];
+    if (story.genres && story.genres.length > 0) {
+        const relatedRes = await fetch(`${apiUrl}/api/public/movies?limit=6&genre=${story.genres[0].slug}`, {
+            next: { revalidate: 3600 }
+        });
+        if (relatedRes.ok) {
+            const relatedData = await relatedRes.json();
+            relatedAnimes = (relatedData.data || []).filter((s: any) => s.id !== story.id).map((s: any) => ({
                 id: s.id,
                 title: s.title,
                 slug: s.slug,
-                coverImage: s.coverImage || undefined,
+                coverImage: formatImage(s.coverImage) || undefined,
                 quality: s.quality || 'HD',
-                currentEpisode: latestChapter?.index,
-                totalEpisodes: totalEps > 0 ? totalEps : undefined,
-            };
-        })
-    );
+                currentEpisode: s.latestChapter?.index,
+                totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,
+            }));
+        }
+    }
 
     return (
         <div className="space-y-6 lg:container lg:mx-auto">
@@ -111,7 +130,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                                 currentEpisode={currentEpisode}
                                 totalEpisodes={totalEpisodes}
                                 storyId={story.id}
-                                poster={story.coverImage || undefined}
+                                poster={formattedCover || undefined}
                             />
                         ) : (
                             <div className="bg-gray-800 rounded-lg p-8 text-center mx-4 md:mx-0">

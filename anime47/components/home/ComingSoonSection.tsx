@@ -13,19 +13,23 @@ interface SectionProps {
 }
 
 export default async function ComingSoonSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
-    // Lấy stories sắp chiếu từ database
-    const stories = await storyService.getUpcomingStories(limit);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    // Lấy stories sắp chiếu từ API (giả sử có param status=trailer hoặc upcoming=true)
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&status=upcoming`, {
+        next: { revalidate: 3600 }
+    });
 
-    if (stories.length === 0) {
-        return null; // Ẩn section nếu không có data
-    }
+    let animeData: any[] = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
-    // Lấy thông tin số tập cho mỗi story
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
+        if (stories.length === 0) {
+            return null; // Ẩn section nếu không có data
+        }
 
+        // Cập nhật thông tin data
+        animeData = stories.map((story: any) => {
             return {
                 id: story.id,
                 title: story.title,
@@ -33,12 +37,14 @@ export default async function ComingSoonSection({ title, limit = 8, numColumns =
                 coverImage: story.coverImage || undefined,
                 rating: story.rating || undefined,
                 quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
+                totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+                currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
             };
-        })
-    );
+        });
+    } else {
+        return null;
+    }
 
     return (
         <section className="mb-12">

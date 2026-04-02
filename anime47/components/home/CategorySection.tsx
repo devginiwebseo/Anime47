@@ -15,36 +15,20 @@ interface SectionProps {
 export default async function CategorySection({ title, limit = 10, numColumns = 5, genreSlug }: SectionProps) {
     if (!genreSlug) return null;
 
-    // Lấy stories theo genreSlug
-    const stories = await prisma.stories.findMany({
-        where: {
-            story_genres: {
-                some: {
-                    genres: {
-                        slug: genreSlug
-                    }
-                }
-            }
-        },
-        orderBy: { updatedAt: 'desc' },
-        take: limit,
-        select: {
-            id: true,
-            title: true,
-            slug: true,
-            coverImage: true,
-            rating: true,
-            quality: true,
-        }
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    // Lấy stories theo genreSlug từ API
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&genre=${genreSlug}`, {
+        next: { revalidate: 3600 }
     });
 
-    if (stories.length === 0) return null;
+    let animeData: any[] = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
+        if (stories.length === 0) return null;
 
+        animeData = stories.map((story: any) => {
             return {
                 id: story.id,
                 title: story.title,
@@ -52,12 +36,14 @@ export default async function CategorySection({ title, limit = 10, numColumns = 
                 coverImage: story.coverImage || undefined,
                 rating: story.rating || undefined,
                 quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
+                totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+                currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
             };
-        })
-    );
+        });
+    } else {
+        return null;
+    }
 
     return (
         <section className="mb-12">

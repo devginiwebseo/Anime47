@@ -8,90 +8,93 @@ import CommentSection from '@/components/detail/CommentSection';
 import RelatedAnime from '@/components/detail/RelatedAnime';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
-import { storyService } from '@/modules/story/story.service';
-import { chapterService } from '@/modules/chapter/chapter.service';
-import { genreService } from '@/modules/genre/genre.service';
-import { commentService } from '@/modules/comment/comment.service';
-import { ratingService } from '@/modules/rating/rating.service';
-import { prisma } from '@/lib/prisma';
 import { slugify } from '@/lib/helpers';
+
+// Tạm giữ lại commentService vì bạn có thể chưa viết API riêng cho comments
+import { commentService } from '@/modules/comment/comment.service';
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    // Fetch story data from database
-    const story = await storyService.getStoryBySlug(slug);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+
+    // Fetch story data từ API
+    const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
+        next: { revalidate: 3600 }
+    });
+
+    if (!res.ok) {
+        notFound();
+    }
+
+    const { data: story } = await res.json();
 
     if (!story) {
         notFound();
     }
 
-    // Fetch chapters/episodes
-    const chapters = await chapterService.getChaptersByStoryId(story.id);
+    // Format các thông tin phụ từ API
+    const genres = story.genres ? story.genres.map((g: any) => g.name) : [];
+    const chapters = story.chapters || [];
+    
+    // Parse cast from string to array
+    const castArray = story.cast ? story.cast.split(',').map((c: string) => c.trim()) : [];
 
-    // Fetch genres
-    const storyGenres = await genreService.getGenresByStoryId(story.id);
-    const genres = storyGenres.map(g => g.name);
+    // Lấy thông tin đạo diễn từ metaJson hoặc director
+    let directors: { name: string, slug: string }[] = [];
+    if (story.metaJson?.directors && Array.isArray(story.metaJson.directors)) {
+        directors = story.metaJson.directors.map((d: any) => ({ name: d.name, slug: slugify(d.name) }));
+    } else if (story.director) {
+        directors = story.director.split(',').map((d: string) => d.trim()).filter(Boolean).map((name: string) => ({ name, slug: slugify(name) }));
+    }
 
-    // Get user IP for showing pending comments
+    // Lấy user IP để lọc bình luận (commentService)
     const headersList = await headers();
     const userIp = headersList.get('x-forwarded-for') || headersList.get('x-real-ip') || 'unknown';
 
-    // For SSR, we can't access localStorage. 
-    // We'll rely on the client-side fetch in CommentSection (if implemented) or just show APPROVED ones first.
+    // Lấy comments
     const comments = await commentService.getStoryComments(story.id, 20, userIp, []);
 
-    // Fetch rating info
-    const ratingInfo = await ratingService.getStoryRatingInfo(story.id);
-
-    // Format episodes for list
-    const episodeList = chapters.map((ch, idx) => ({
+    // Format episodes cho EpisodeList
+    const episodeList = chapters.map((ch: any) => ({
         id: ch.id,
         number: ch.index,
         title: ch.title,
-        isWatched: false, // TODO: Implement watch history
+        isWatched: false,
     }));
 
-    // Parse cast from string to array
-    const castArray = story.cast ? story.cast.split(',').map(c => c.trim()) : [];
+    const description = story.description || 'Chưa có mô tả cho anime này.';
 
-    // Parse directors
-    const directorNames = story.director ? story.director.split(',').map(d => d.trim()).filter(Boolean) : [];
-    let directors: { name: string, slug: string }[] = [];
-    if (directorNames.length > 0) {
-        const authorsInDb = await prisma.authors.findMany({
-            where: { name: { in: directorNames } }
-        });
-        directors = directorNames.map(name => {
-            const found = authorsInDb.find(a => a.name === name);
-            if (found) return { name: found.name, slug: found.slug };
-            return { name, slug: slugify(name) };
-        });
-    } else if (story.authors) {
-        directors = [{ name: story.authors.name, slug: story.authors.slug }];
-    }
+    // Fix relative URL for coverImage
+    const formatImage = (url?: string) => {
+        if (url && url.includes('/upload/')) {
+            return url.substring(url.indexOf('/upload/'));
+        }
+        return url;
+    };
 
-    // Fetch related animes (same genre)
-    const relatedStoriesRaw = await storyService.getRelatedStories(story.id, 8);
-    const relatedAnimes = await Promise.all(
-        relatedStoriesRaw.map(async (s) => {
-            const totalEps = await chapterService.countChapters(s.id);
-            const latestChapter = await chapterService.getLatestChapter(s.id);
-            return {
+    const formattedCover = formatImage(story.coverImage);
+
+    // Fetch related animes bằng API mới, truyền theo genre đầu tiên của phim
+    let relatedAnimes: any[] = [];
+    if (story.genres && story.genres.length > 0) {
+        const relatedRes = await fetch(`${apiUrl}/api/public/movies?limit=8&genre=${story.genres[0].slug}`, {
+            next: { revalidate: 3600 }
+        });
+        if (relatedRes.ok) {
+            const relatedData = await relatedRes.json();
+            relatedAnimes = (relatedData.data || []).filter((s: any) => s.id !== story.id).map((s: any) => ({
                 id: s.id,
                 title: s.title,
                 slug: s.slug,
-                coverImage: s.coverImage || undefined,
+                coverImage: formatImage(s.coverImage) || undefined,
                 rating: s.rating || undefined,
                 quality: s.quality || 'HD',
-                totalEpisodes: totalEps > 0 ? totalEps : undefined,
-                currentEpisode: latestChapter?.index,
+                totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,
+                currentEpisode: s.latestChapter?.index,
                 isNew: false,
-            };
-        })
-    );
-
-    // Format description
-    const description = story.description || 'Chưa có mô tả cho anime này.';
+            }));
+        }
+    }
 
     return (
         <div className="space-y-6">
@@ -101,8 +104,8 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 slug={story.slug}
                 originalTitle={story.alternativeName || undefined}
                 year={story.releaseYear || undefined}
-                coverImage={story.coverImage || undefined}
-                rating={ratingInfo.averageRating || story.rating || undefined}
+                coverImage={formattedCover || undefined}
+                rating={Number(story.avgRating) || story.rating || undefined}
                 status={story.status || 'Đang cập nhật'}
                 totalEpisodes={chapters.length}
                 quality={story.quality || 'HD'}

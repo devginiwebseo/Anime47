@@ -13,19 +13,23 @@ interface SectionProps {
 }
 
 export default async function RecommendedSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
-    // Lấy stories hot/đề cử từ database
-    const stories = await storyService.getHotStories(limit);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    // Lấy stories đề cử/hot từ database thông qua API (giả sử có param tag=hot hoặc sort=views)
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&sort=views`, {
+        next: { revalidate: 3600 }
+    });
 
-    if (stories.length === 0) {
-        return null;
-    }
+    let animeData: any[] = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
-    // Lấy thông tin số tập cho mỗi story
-    const animeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
+        if (stories.length === 0) {
+            return null;
+        }
 
+        // Lấy thông tin số tập cho mỗi story
+        animeData = stories.map((story: any) => {
             return {
                 id: story.id,
                 title: story.title,
@@ -33,12 +37,14 @@ export default async function RecommendedSection({ title, limit = 8, numColumns 
                 coverImage: story.coverImage || undefined,
                 rating: story.rating || undefined,
                 quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
+                totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+                currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
             };
-        })
-    );
+        });
+    } else {
+        return null;
+    }
 
     return (
         <section className="mb-12">

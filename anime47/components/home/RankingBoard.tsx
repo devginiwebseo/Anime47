@@ -71,7 +71,7 @@ export default function RankingBoard({ rankingData, title = 'Bảng Xếp Hạng
                             <div className="relative w-[70px] h-[95px] flex-shrink-0 rounded-md overflow-hidden ring-1 ring-white/5 shadow-lg">
                                 {anime.coverImage ? (
                                     <Image
-                                        src={anime.coverImage}
+                                        src={anime.coverImage.includes('/upload/') ? anime.coverImage.substring(anime.coverImage.indexOf('/upload/')) : anime.coverImage}
                                         alt={anime.title}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-500"

@@ -36,7 +36,7 @@ export default function AnimeCard({
                 <div className="aspect-[2/3] relative bg-[#1c1d22]">
                     {coverImage ? (
                         <Image
-                            src={coverImage}
+                            src={coverImage.includes('/upload/') ? coverImage.substring(coverImage.indexOf('/upload/')) : coverImage}
                             alt={title}
                             fill
                             className="object-cover"

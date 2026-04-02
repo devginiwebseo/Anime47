@@ -11,22 +11,26 @@ interface SectionProps {
 }
 
 export default async function AnimeHotList({ title, limit = 10 }: SectionProps) {
-    // Lấy 10 stories hot nhất từ database (theo views và rating)
-    const stories = await storyService.getHotStories(limit);
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    // Lấy stories hot từ API (có thể cần truyền thêm param sort=views)
+    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&sort=views`, {
+        next: { revalidate: 3600 } // Tùy chỉnh bộ nhớ đệm
+    });
+    
+    let hotAnimeData = [];
+    if (res.ok) {
+        const result = await res.json();
+        const stories = result.data || [];
 
-    // Format data cho component
-    const hotAnimeData = await Promise.all(
-        stories.map(async (story) => {
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
-
+        // Format data cho component
+        hotAnimeData = stories.map((story: any) => {
             let status = 'Đang cập nhật';
             if (story.status === 'completed' || story.status === 'Hoàn thành') {
                 status = 'Full';
-            } else if (latestChapter) {
-                status = totalEpisodes > 0
-                    ? `Tập ${latestChapter.index}/${totalEpisodes}`
-                    : `Tập ${latestChapter.index}`;
+            } else if (story.latestChapter) {
+                status = story.totalEpisodes > 0
+                    ? `Tập ${story.latestChapter.index}/${story.totalEpisodes}`
+                    : `Tập ${story.latestChapter.index}`;
             }
 
             return {
@@ -37,8 +41,8 @@ export default async function AnimeHotList({ title, limit = 10 }: SectionProps) 
                 rating: story.rating || undefined,
                 status,
             };
-        })
-    );
+        });
+    }
 
     return (
         <div className="rounded-xl">
@@ -51,7 +55,7 @@ export default async function AnimeHotList({ title, limit = 10 }: SectionProps) 
 
             {hotAnimeData.length > 0 ? (
                 <div className="space-y-3">
-                    {hotAnimeData.map((anime) => (
+                    {hotAnimeData.map((anime: any) => (
                         <Link
                             key={anime.id}
                             href={`/anime/${anime.slug}`}
@@ -61,7 +65,7 @@ export default async function AnimeHotList({ title, limit = 10 }: SectionProps) 
                             <div className="relative w-16 h-20 md:w-16 md:h-20 flex-shrink-0 rounded-md overflow-hidden ring-1 ring-white/5 transition-all">
                                 {anime.coverImage ? (
                                     <Image
-                                        src={anime.coverImage}
+                                        src={anime.coverImage.includes('/upload/') ? anime.coverImage.substring(anime.coverImage.indexOf('/upload/')) : anime.coverImage}
                                         alt={anime.title}
                                         fill
                                         className="object-cover group-hover:scale-110 transition-transform duration-500"
