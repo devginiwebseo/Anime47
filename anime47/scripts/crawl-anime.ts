@@ -64,8 +64,26 @@ const prisma = new PrismaClient({
 })
 
 // ═══════════════════════════════════════════════════════════════
-// HTTP CLIENT
+// DYNAMIC DOMAIN & HTTP CLIENT
 // ═══════════════════════════════════════════════════════════════
+
+let currentBaseUrl = 'https://anime47.tv';
+
+function normalizeUrl(url: string): string {
+  if (!url) return url;
+  try {
+    if (url.startsWith('/')) {
+      return `${currentBaseUrl}${url}`;
+    }
+    const u = new URL(url);
+    if (u.hostname.includes('anime47')) {
+      return `${currentBaseUrl}${u.pathname}${u.search}${u.hash}`;
+    }
+    return url;
+  } catch {
+    return url;
+  }
+}
 
 const httpClient: AxiosInstance = axios.create({
   timeout: CONFIG.TIMEOUT,
@@ -75,12 +93,27 @@ const httpClient: AxiosInstance = axios.create({
   },
 })
 
-async function fetchWithRetry(url: string, retries = CONFIG.MAX_RETRIES): Promise<string> {
+async function fetchWithRetry(originalUrl: string, retries = CONFIG.MAX_RETRIES): Promise<string> {
+  const url = normalizeUrl(originalUrl);
   for (let i = 0; i < retries; i++) {
     try {
       const response = await httpClient.get(url, {
         responseType: 'text',
       })
+      
+      // Auto-detect 301 redirects and update currentBaseUrl to optimize future requests
+      const finalUrlStr = response.request?.res?.responseUrl || (response.request && response.request.responseURL);
+      if (finalUrlStr) {
+        try {
+          const finalUrl = new URL(finalUrlStr);
+          const newBaseUrl = `${finalUrl.protocol}//${finalUrl.host}`;
+          if (newBaseUrl !== currentBaseUrl && finalUrl.hostname.includes('anime47')) {
+            log('info', `🔄 Domain auto-updated via 301 redirect: ${currentBaseUrl} -> ${newBaseUrl}`);
+            currentBaseUrl = newBaseUrl;
+          }
+        } catch (e) {}
+      }
+      
       return response.data
     } catch (error: any) {
       log('warn', `Fetch failed (${i + 1}/${retries}): ${url} - ${error.message}`)
@@ -172,11 +205,12 @@ async function downloadImage(imageUrl: string): Promise<string | null> {
     }
 
     // Download
-    const response = await httpClient.get(imageUrl, {
+    const finalImageUrl = normalizeUrl(imageUrl);
+    const response = await httpClient.get(finalImageUrl, {
       responseType: 'arraybuffer',
       timeout: 15000,
       headers: {
-        'Referer': 'https://anime47.tv/',
+        'Referer': `${currentBaseUrl}/`,
       },
     })
 
@@ -349,7 +383,8 @@ function detectSitemapType(sitemapUrl: string): SitemapType {
 // GENRE CRAWLING
 // ═══════════════════════════════════════════════════════════════
 
-async function crawlGenre(url: string): Promise<void> {
+async function crawlGenre(originalUrl: string): Promise<void> {
+  const url = normalizeUrl(originalUrl);
   try {
     const slug = extractSlugFromUrl(url)
     if (!slug) {
@@ -409,7 +444,8 @@ interface AnimeDetailRaw {
   sourceUrl: string
 }
 
-async function crawlAnimeDetail(url: string): Promise<void> {
+async function crawlAnimeDetail(originalUrl: string): Promise<void> {
+  const url = normalizeUrl(originalUrl);
   try {
     log('info', `Crawling: ${url}`)
 
@@ -516,7 +552,7 @@ async function crawlAnimeDetail(url: string): Promise<void> {
       const epTitle = $el.find('.episode-number').text().trim() || $el.text().trim()
       const epUrl = $el.attr('href')
       if (epUrl) {
-        episodes.push({ title: epTitle, url: epUrl })
+        episodes.push({ title: epTitle, url: normalizeUrl(epUrl) })
       }
     })
 
