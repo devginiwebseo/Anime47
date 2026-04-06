@@ -33,10 +33,12 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
     // Fetch comments including pending ones
     const fetchComments = async (ids: string[]) => {
         try {
-            const res = await fetch(`/api/comment?storyId=${storyId}&pendingIds=${ids.join(',')}`);
+            const res = await fetch(`/api/comment?storyId=${storyId}&pendingIds=${ids.join(',')}`, {
+                cache: 'no-cache'
+            });
             if (res.ok) {
                 const data = await res.json();
-                setDisplayComments(data);
+                setDisplayComments(data.data || data); // Handle both {data: []} and [] formats
             }
         } catch (err) {
             console.error('Failed to fetch comments', err);
@@ -56,6 +58,10 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
             }
         }
         fetchComments(ids);
+
+        // Auto refresh every 30 seconds to check for approved comments
+        const interval = setInterval(() => fetchComments(ids), 30000);
+        return () => clearInterval(interval);
     }, [storyId]);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -75,34 +81,48 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
         setIsSubmitting(true);
 
         try {
-            const res = await fetch('/api/comment', {
+            // 1. Submit Comment (using local proxy)
+            const commentRes = await fetch(`/api/comment`, {
                 method: 'POST',
+                cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     storyId,
                     author: authorName.trim(),
                     email: email.trim() || undefined,
                     content: newComment.trim(),
-                    rating: rating > 0 ? rating : undefined,
                 }),
             });
 
-            const data = await res.json();
-            if (!res.ok) {
-                throw new Error(data.error || 'Có lỗi xảy ra');
+            const commentData = await commentRes.json();
+            if (!commentRes.ok) {
+                throw new Error(commentData.error || 'Có lỗi xảy ra khi gửi bình luận');
+            }
+
+            // 2. Submit Rating if set (using local proxy)
+            if (rating > 0) {
+                await fetch(`/api/rating`, {
+                    method: 'POST',
+                    cache: 'no-cache',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        storyId,
+                        score: rating,
+                    }),
+                }).catch(err => console.error('Failed to submit rating:', err));
             }
 
             // Save new pending comment ID to local storage
             let updatedPending = pendingIds;
-            if (data.comment?.id) {
-                updatedPending = [...pendingIds, data.comment.id];
+            const newCommentId = commentData.comment?.id || commentData.data?.id;
+            if (newCommentId) {
+                updatedPending = [...pendingIds, newCommentId];
                 setPendingIds(updatedPending);
                 localStorage.setItem(`pending_comments_${storyId}`, JSON.stringify(updatedPending));
             }
 
-            setSuccess('Bình luận đã được gửi và đang chờ phê duyệt!');
+            setSuccess('Bình luận và đánh giá đã được gửi thành công!');
             setNewComment('');
-            setEmail('');
             setRating(0);
 
             // Re-fetch comments to show the new one immediately

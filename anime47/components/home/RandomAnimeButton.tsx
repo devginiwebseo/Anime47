@@ -11,10 +11,14 @@ export default function RandomAnimeButton() {
         if (loading) return;
         setLoading(true);
         try {
-            const res = await fetch('/api/anime/random');
+            const res = await fetch('/api/public/random');
             const data = await res.json();
-            if (data.slug) {
-                router.push(`/anime/${data.slug}`);
+            if (data.success && data.data) {
+                if (data.data.link) {
+                    router.push(data.data.link);
+                } else if (data.data.slug) {
+                    router.push(`/anime/${data.data.slug}`);
+                }
             }
         } catch (error) {
             console.error('Random anime failed:', error);

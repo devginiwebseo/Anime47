@@ -20,7 +20,7 @@ export default function AnimeCard({
     title,
     slug,
     coverImage,
-    rating = 5.0,
+    rating,
     quality = 'FHD',
     totalEpisodes,
     currentEpisode,
@@ -29,6 +29,9 @@ export default function AnimeCard({
 }: AnimeCardProps) {
     const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
 
+    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+
     return (
         <Link href={`/anime/${slug}`} className="group block">
             <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
@@ -36,7 +39,7 @@ export default function AnimeCard({
                 <div className="aspect-[2/3] relative bg-[#1c1d22]">
                     {coverImage ? (
                         <Image
-                            src={coverImage.includes('/upload/') ? coverImage.substring(coverImage.indexOf('/upload/')) : coverImage}
+                            src={coverImage.includes('/upload/') ? `${baseUrl}${coverImage.substring(coverImage.indexOf('/upload/'))}` : coverImage}
                             alt={title}
                             fill
                             className="object-cover"
@@ -57,7 +60,7 @@ export default function AnimeCard({
                         {/* Star Rating Top Left */}
                         <div className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded flex items-center gap-1 text-[10px] font-bold border border-white/10">
                             <span className="text-yellow-400">★</span>
-                            {rating.toFixed(1)}
+                            {(rating || 0).toFixed(1)} / 5
                         </div>
 
                         {/* Status/Episode Top Right */}

@@ -15,7 +15,7 @@ import { commentService } from '@/modules/comment/comment.service';
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
 
     // Fetch story data từ API
     const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
@@ -67,7 +67,8 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     // Fix relative URL for coverImage
     const formatImage = (url?: string) => {
         if (url && url.includes('/upload/')) {
-            return url.substring(url.indexOf('/upload/'));
+            const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+            return `${baseUrl}${url.substring(url.indexOf('/upload/'))}`;
         }
         return url;
     };
@@ -87,7 +88,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 title: s.title,
                 slug: s.slug,
                 coverImage: formatImage(s.coverImage) || undefined,
-                rating: s.rating || undefined,
+                rating: s.averageRating || undefined,
                 quality: s.quality || 'HD',
                 totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,
                 currentEpisode: s.latestChapter?.index,
@@ -105,7 +106,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 originalTitle={story.alternativeName || undefined}
                 year={story.releaseYear || undefined}
                 coverImage={formattedCover || undefined}
-                rating={Number(story.avgRating) || story.rating || undefined}
+                rating={story.rating || story.averageRating || Number(story.avgRating) || 0}
                 status={story.status || 'Đang cập nhật'}
                 totalEpisodes={chapters.length}
                 quality={story.quality || 'HD'}

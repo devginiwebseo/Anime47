@@ -64,6 +64,7 @@ export default function AnimeDetailHeader({
         if (storyId) {
             fetch('/api/anime/view', {
                 method: 'POST',
+                cache: 'no-cache',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ storyId }),
             }).catch(err => console.error('Failed to increment view:', err));
@@ -212,13 +213,20 @@ export default function AnimeDetailHeader({
                         <hr className="border-t border-gray-700 w-full mb-4 mt-4" />
 
                         <a href="#comments" className="flex items-center justify-between w-full bg-[#1c1d22] px-4 py-3 rounded-xl border border-gray-800 hover:border-yellow-500/30 hover:bg-[#252630] transition-all duration-300 group cursor-pointer shadow-md mb-2">
-                            <div className="flex text-gray-500 text-[20px] group-hover:scale-105 transition-transform duration-300 gap-1">
-                                {/* Simple stars for visual */}
-                                <span className={rating >= 2 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
-                                <span className={rating >= 4 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
-                                <span className={rating >= 6 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
-                                <span className={rating >= 8 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
-                                <span className={rating >= 10 ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}>★</span>
+                            <div className="flex items-center gap-3">
+                                <div className="flex text-gray-500 text-[20px] group-hover:scale-105 transition-transform duration-300 gap-1">
+                                    {[1, 2, 3, 4, 5].map((starValue) => (
+                                        <span 
+                                            key={starValue} 
+                                            className={rating >= starValue ? "text-yellow-500 drop-shadow-[0_0_8px_rgba(234,179,8,0.8)]" : ""}
+                                        >
+                                            ★
+                                        </span>
+                                    ))}
+                                </div>
+                                <div className="text-yellow-500 font-bold text-lg">
+                                    {(rating || 0).toFixed(1)}/5
+                                </div>
                             </div>
                             <div className="text-[13px] font-bold text-gray-300 bg-[#2b2d35] px-4 py-1.5 rounded-full group-hover:text-white transition-colors border border-gray-700/50 tracking-wide">
                                 Lượt xem: {views.toLocaleString('vi-VN')}

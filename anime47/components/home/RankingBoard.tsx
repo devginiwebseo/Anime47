@@ -71,7 +71,7 @@ export default function RankingBoard({ rankingData, title = 'Bảng Xếp Hạng
                             <div className="relative w-[70px] h-[95px] flex-shrink-0 rounded-md overflow-hidden ring-1 ring-white/5 shadow-lg">
                                 {anime.coverImage ? (
                                     <Image
-                                        src={anime.coverImage.includes('/upload/') ? anime.coverImage.substring(anime.coverImage.indexOf('/upload/')) : anime.coverImage}
+                                        src={anime.coverImage || '/placeholder-anime.png'}
                                         alt={anime.title}
                                         fill
                                         className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -104,7 +104,7 @@ export default function RankingBoard({ rankingData, title = 'Bảng Xếp Hạng
 
                                     {/* Compact Episode Pill */}
                                     <div className="bg-gray-800/60 text-gray-300 px-2.5 py-0.5 rounded-md text-[10px] font-black border border-gray-700/50">
-                                        Tập {anime.episodes || '??'}
+                                        {anime.episodes || '??'}
                                     </div>
 
                                     {/* Simple Year */}

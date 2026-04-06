@@ -1,8 +1,6 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { prisma } from '@/lib/prisma';
 import AnimeCard from '@/components/home/AnimeCard';
-import { chapterService } from '@/modules/chapter/chapter.service';
 import Pagination from '@/components/ui/Pagination';
 
 export default async function GenrePage(props: {
@@ -12,50 +10,40 @@ export default async function GenrePage(props: {
     const { slug } = await props.params;
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
-    const pageSize = 20;
-    const skip = (currentPage - 1) * pageSize;
+    const limit = 20;
 
-    // Fetch genre
-    const genre = await prisma.genres.findUnique({
-        where: { slug },
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const res = await fetch(`${apiUrl}/api/public/genres?slug=${slug}&limit=${limit}&page=${currentPage}`, {
+        next: { revalidate: 60 }
     });
 
-    if (!genre) {
+    let result: { success: boolean, genre: any, data: any[], pagination: any } = { success: false, genre: null, data: [], pagination: { totalItems: 0, totalPages: 1 } };
+    if (res.ok) {
+        result = await res.json();
+    }
+
+    if (!result.genre) {
         notFound();
     }
 
-    // Process stories by genre
-    const [storyGenres, totalStories] = await Promise.all([
-        prisma.story_genres.findMany({
-            where: { genreId: genre.id },
-            include: { stories: true },
-            take: pageSize,
-            skip: skip,
-            orderBy: { stories: { createdAt: 'desc' } }
-        }),
-        prisma.story_genres.count({ where: { genreId: genre.id } })
-    ]);
+    const { genre, data: stories, pagination } = result;
+    const totalStories = pagination?.totalItems || stories.length;
+    const totalPages = pagination?.totalPages || Math.ceil(totalStories / limit);
 
-    const totalPages = Math.ceil(totalStories / pageSize);
-
-    const animeData = await Promise.all(
-        storyGenres.map(async (sg) => {
-            const story = sg.stories;
-            const totalEpisodes = await chapterService.countChapters(story.id);
-            const latestChapter = await chapterService.getLatestChapter(story.id);
-
-            return {
-                id: story.id,
-                title: story.title,
-                slug: story.slug,
-                coverImage: story.coverImage || undefined,
-                rating: story.rating || undefined,
-                quality: story.quality || 'HD',
-                totalEpisodes: totalEpisodes > 0 ? totalEpisodes : undefined,
-                currentEpisode: latestChapter?.index || undefined,
-            };
-        })
-    );
+    const animeData = stories.map((story: any) => {
+        return {
+            id: story.id,
+            title: story.title,
+            slug: story.slug,
+            coverImage: story.coverImage || undefined,
+            rating: story.averageRating || story.rating || 0,
+            quality: story.quality || 'HD',
+            totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+            currentEpisode: story.latestChapter?.index || undefined,
+            isNew: false,
+            views: story.views || 0,
+        };
+    });
 
     return (
         <div className="space-y-6">

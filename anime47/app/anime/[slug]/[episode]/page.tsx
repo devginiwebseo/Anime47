@@ -23,7 +23,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
         notFound();
     }
 
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
 
     // Fetch story data từ API
     const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
@@ -76,7 +76,8 @@ export default async function WatchPage({ params }: WatchPageProps) {
     // Fix relative URL for coverImage local
     const formatImage = (url?: string) => {
         if (url && url.includes('/upload/')) {
-            return url.substring(url.indexOf('/upload/'));
+            const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+            return `${baseUrl}${url.substring(url.indexOf('/upload/'))}`;
         }
         return url;
     };
@@ -95,6 +96,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 title: s.title,
                 slug: s.slug,
                 coverImage: formatImage(s.coverImage) || undefined,
+                rating: s.averageRating || undefined,
                 quality: s.quality || 'HD',
                 currentEpisode: s.latestChapter?.index,
                 totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,

@@ -13,7 +13,7 @@ interface SectionProps {
 }
 
 export default async function ComingSoonSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
     // Lấy stories sắp chiếu từ API (giả sử có param status=trailer hoặc upcoming=true)
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&status=upcoming`, {
         next: { revalidate: 3600 }
@@ -35,7 +35,7 @@ export default async function ComingSoonSection({ title, limit = 8, numColumns =
                 title: story.title,
                 slug: story.slug,
                 coverImage: story.coverImage || undefined,
-                rating: story.rating || undefined,
+                rating: story.averageRating || undefined,
                 quality: story.quality || 'HD',
                 totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
                 currentEpisode: story.latestChapter?.index || undefined,

@@ -11,7 +11,7 @@ interface SectionProps {
 }
 
 export default async function AnimeHotList({ title, limit = 10 }: SectionProps) {
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
     // Lấy stories hot từ API (có thể cần truyền thêm param sort=views)
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&sort=views`, {
         next: { revalidate: 3600 } // Tùy chỉnh bộ nhớ đệm
@@ -38,7 +38,7 @@ export default async function AnimeHotList({ title, limit = 10 }: SectionProps) 
                 title: story.title,
                 slug: story.slug,
                 coverImage: story.coverImage || undefined,
-                rating: story.rating || undefined,
+                rating: story.averageRating || undefined,
                 status,
             };
         });
@@ -65,7 +65,7 @@ export default async function AnimeHotList({ title, limit = 10 }: SectionProps) 
                             <div className="relative w-16 h-20 md:w-16 md:h-20 flex-shrink-0 rounded-md overflow-hidden ring-1 ring-white/5 transition-all">
                                 {anime.coverImage ? (
                                     <Image
-                                        src={anime.coverImage.includes('/upload/') ? anime.coverImage.substring(anime.coverImage.indexOf('/upload/')) : anime.coverImage}
+                                        src={anime.coverImage.includes('/upload/') ? `${apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl}${anime.coverImage.substring(anime.coverImage.indexOf('/upload/'))}` : anime.coverImage}
                                         alt={anime.title}
                                         fill
                                         className="object-cover group-hover:scale-110 transition-transform duration-500"

@@ -1,40 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { commentService } from '@/modules/comment/comment.service';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { storyId, author, email, content, rating } = body;
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
 
-        if (!storyId || !author || !content) {
-            return NextResponse.json(
-                { error: 'Missing required fields' },
-                { status: 400 }
-            );
+        // Forward to external API to bypass CORS
+        const res = await fetch(`${apiUrl}/api/public/comment`, {
+            method: 'POST',
+            cache: 'no-cache',
+            next: { revalidate: 0 },
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            return NextResponse.json(data, { status: res.status });
         }
 
-        // Get user IP
-        const userIp = request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown';
-
-        const comment = await commentService.addComment({
-            storyId,
-            author: author.trim(),
-            email: email ? email.trim() : undefined,
-            content: content.trim(),
-            userIp,
-            rating: rating || undefined,
-        });
-
-        return NextResponse.json({
-            success: true,
-            comment,
-        });
+        return NextResponse.json(data);
     } catch (error: any) {
-        console.error('Error adding comment:', error);
+        console.error('Proxy Error adding comment:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to add comment' },
+            { error: error.message || 'Failed to add comment via proxy' },
             { status: 500 }
         );
     }
@@ -42,36 +31,27 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const searchParams = request.nextUrl.searchParams;
-        const storyId = searchParams.get('storyId');
-        const limit = searchParams.get('limit');
+        const { searchParams } = new URL(request.url);
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
 
-        if (!storyId) {
-            return NextResponse.json(
-                { error: 'Missing storyId' },
-                { status: 400 }
-            );
+        // Redirect to external API via Server
+        const externalRes = await fetch(`${apiUrl}/api/public/comment?${searchParams.toString()}`, {
+            method: 'GET',
+            cache: 'no-cache',
+            next: { revalidate: 0 },
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const data = await externalRes.json();
+        if (!externalRes.ok) {
+            return NextResponse.json(data, { status: externalRes.status });
         }
 
-        const userIp = request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown';
-        
-        const pendingIdsStr = searchParams.get('pendingIds');
-        const pendingIds = pendingIdsStr ? pendingIdsStr.split(',') : [];
-
-        const comments = await commentService.getStoryComments(
-            storyId,
-            limit ? parseInt(limit) : undefined,
-            userIp,
-            pendingIds
-        );
-
-        return NextResponse.json(comments);
+        return NextResponse.json(data);
     } catch (error: any) {
-        console.error('Error getting comments:', error);
+        console.error('Proxy Error getting comments:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to get comments' },
+            { error: error.message || 'Failed to get comments via proxy' },
             { status: 500 }
         );
     }

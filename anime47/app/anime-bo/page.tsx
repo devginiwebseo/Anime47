@@ -16,7 +16,7 @@ export default async function AnimeBoPage(props: {
 
     // Call API để lấy data phim thay vì dùng prisma / database
     // Sử dụng biến API_URL trong file .env
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&page=${currentPage}`, {
         next: { revalidate: 60 } // Cache 60s
     });
@@ -39,12 +39,12 @@ export default async function AnimeBoPage(props: {
             title: story.title,
             slug: story.slug,
             coverImage: story.coverImage || undefined,
-            rating: story.rating || undefined, // Đợi bạn bổ sung API
+            rating: story.averageRating || story.rating || 0,
             quality: story.quality || 'HD',
             totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
             currentEpisode: story.latestChapter?.index || undefined,
             isNew: false,
-            views: story.views || 0, // Đợi bạn bổ sung API
+            views: story.views || 0,
         };
     });
 

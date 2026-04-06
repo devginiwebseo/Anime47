@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 import { logger } from '@/lib/logger';
 
 export async function POST(request: Request) {
@@ -10,23 +9,30 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: 'storyId is required' }, { status: 400 });
         }
 
-        // Tăng views trong database
-        const updatedStory = await prisma.stories.update({
-            where: { id: storyId },
-            data: {
-                views: {
-                    increment: 1
-                }
-            },
-            select: { views: true }
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
+
+        // Call External API via Server (Bypassing CORS)
+        const res = await fetch(`${apiUrl}/api/public/view`, {
+            method: 'POST',
+            cache: 'no-cache',
+            next: { revalidate: 0 },
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ storyId }),
         });
+
+        if (!res.ok) {
+            const errorRes = await res.json().catch(() => ({}));
+            throw new Error(errorRes.message || 'Failed to update views on main api');
+        }
+
+        const data = await res.json();
 
         return NextResponse.json({
             success: true,
-            views: updatedStory.views
+            views: data.views || 0
         });
     } catch (error: any) {
         logger.error('API Error: Failed to increment views', error);
-        return NextResponse.json({ success: false, error: 'Failed to update views' }, { status: 500 });
+        return NextResponse.json({ success: false, error: error.message || 'Failed to update views' }, { status: 500 });
     }
 }

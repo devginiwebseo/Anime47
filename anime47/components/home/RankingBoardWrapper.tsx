@@ -17,7 +17,7 @@ interface RankingAnime {
 async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
     // Fetch stories cho mỗi khoảng thời gian qua API
     const fetchRanking = async (period: 'day' | 'month' | 'year') => {
-        const apiUrl = process.env.API_URL || 'http://localhost:3000';
+        const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
         try {
             const res = await fetch(`${apiUrl}/api/public/movies?limit=10&sort=views&period=${period}`, {
                 next: { revalidate: 3600 }
@@ -40,6 +40,7 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
 
     // Format dữ liệu
     const formatStories = (stories: any[]): RankingAnime[] => {
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
         return stories.map(story => {
             const latestChapter = story.latestChapter;
             let episodes = 'Đang cập nhật';
@@ -52,12 +53,17 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
                     : `Tập ${latestChapter.index}`;
             }
 
+            let imageUrl = story.coverImage || '';
+            if (imageUrl && imageUrl.includes('/upload/')) {
+                imageUrl = `${apiUrl}${imageUrl.substring(imageUrl.indexOf('/upload/'))}`;
+            }
+
             return {
                 id: story.id,
                 title: story.title,
                 slug: story.slug,
-                coverImage: story.coverImage || undefined,
-                rating: story.rating || 0,
+                coverImage: imageUrl,
+                rating: story.averageRating || 0,
                 episodes,
                 year: story.releaseYear || undefined,
             };

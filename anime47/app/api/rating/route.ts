@@ -1,35 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { ratingService } from '@/modules/rating/rating.service';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { storyId, score } = body;
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
 
-        if (!storyId || !score) {
-            return NextResponse.json(
-                { error: 'Missing required fields' },
-                { status: 400 }
-            );
+        // Proxy to external API
+        const res = await fetch(`${apiUrl}/api/public/rating`, {
+            method: 'POST',
+            cache: 'no-cache',
+            next: { revalidate: 0 },
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+            return NextResponse.json(data, { status: res.status });
         }
 
-        // Get user IP
-        const userIp = request.headers.get('x-forwarded-for') || 
-                      request.headers.get('x-real-ip') || 
-                      'unknown';
-
-        const rating = await ratingService.addRating(storyId, userIp, score);
-        const ratingInfo = await ratingService.getStoryRatingInfo(storyId);
-
-        return NextResponse.json({
-            success: true,
-            rating,
-            ratingInfo,
-        });
+        return NextResponse.json(data);
     } catch (error: any) {
-        console.error('Error adding rating:', error);
+        console.error('Proxy Error adding rating:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to add rating' },
+            { error: error.message || 'Failed to add rating via proxy' },
             { status: 500 }
         );
     }
@@ -37,23 +31,26 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
     try {
-        const searchParams = request.nextUrl.searchParams;
-        const storyId = searchParams.get('storyId');
+        const { searchParams } = new URL(request.url);
+        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
 
-        if (!storyId) {
-            return NextResponse.json(
-                { error: 'Missing storyId' },
-                { status: 400 }
-            );
+        const externalRes = await fetch(`${apiUrl}/api/public/rating?${searchParams.toString()}`, {
+            method: 'GET',
+            cache: 'no-cache',
+            next: { revalidate: 0 },
+            headers: { 'Content-Type': 'application/json' },
+        });
+
+        const data = await externalRes.json();
+        if (!externalRes.ok) {
+            return NextResponse.json(data, { status: externalRes.status });
         }
 
-        const ratingInfo = await ratingService.getStoryRatingInfo(storyId);
-
-        return NextResponse.json(ratingInfo);
+        return NextResponse.json(data);
     } catch (error: any) {
-        console.error('Error getting rating info:', error);
+        console.error('Proxy Error getting rating info:', error);
         return NextResponse.json(
-            { error: error.message || 'Failed to get rating info' },
+            { error: error.message || 'Failed to get rating info via proxy' },
             { status: 500 }
         );
     }
