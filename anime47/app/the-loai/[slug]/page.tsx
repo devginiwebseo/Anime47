@@ -10,10 +10,10 @@ export default async function GenrePage(props: {
     const { slug } = await props.params;
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
-    const limit = 20;
+    const limit = 10;
 
     const apiUrl = process.env.API_URL || 'https://api.animeez.online';
-    const res = await fetch(`${apiUrl}/api/public/genres?slug=${slug}&limit=${limit}&page=${currentPage}`, {
+    const res = await fetch(`${apiUrl}/api/public/genres?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`, {
         next: { revalidate: 60 }
     });
 
@@ -35,11 +35,11 @@ export default async function GenrePage(props: {
             id: story.id,
             title: story.title,
             slug: story.slug,
-            coverImage: story.coverImage || undefined,
+            coverImage: story.coverImage || story.thumbnail || undefined,
             rating: story.averageRating || story.rating || 0,
-            quality: story.quality || 'HD',
+            quality: story.quality || 'FHD',
             totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
-            currentEpisode: story.latestChapter?.index || undefined,
+            currentEpisode: story.latestChapter?.index || (story.totalEpisodes > 0 ? story.totalEpisodes : undefined),
             isNew: false,
             views: story.views || 0,
         };

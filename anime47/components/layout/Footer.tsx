@@ -34,6 +34,8 @@ export default function Footer() {
                             <li><Link href="/anime-bo">Anime Bộ</Link></li>
                             <li><Link href="/anime-le">Anime Lẻ</Link></li>
                             <li><Link href="/moi-cap-nhat">Anime Mới Cập Nhật</Link></li>
+                            <li><Link href="/quoc-gia">Quốc Gia</Link></li>
+                            <li><Link href="/lich-chieu">Lịch Chiếu</Link></li>
                         </ul>
                     </div>
 

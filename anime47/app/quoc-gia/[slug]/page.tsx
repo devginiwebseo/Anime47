@@ -1,33 +1,41 @@
 ﻿import React from 'react';
+import { notFound } from 'next/navigation';
 import AnimeCard from '@/components/home/AnimeCard';
 import Pagination from '@/components/ui/Pagination';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
 
-export const metadata = {
-    title: 'Anime Bộ - Anime47',
-    description: 'Danh sách Anime Bộ mới nhất, cập nhật liên tục.',
-};
-
-export default async function AnimeBoPage(props: {
-    searchParams: Promise<{ page?: string }>
+export default async function CountryDetailPage(props: {
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ page?: string }>;
 }) {
+    const { slug } = await props.params;
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 20;
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&page=${currentPage}`, {
-        next: { revalidate: 60 }
-    });
-    
-    let result = { success: false, data: [], pagination: { totalItems: 0, totalPages: 1 } };
+    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const res = await fetch(
+        `${apiUrl}/api/public/countries?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
+        { next: { revalidate: 60 } }
+    );
+
+    let result: { success: boolean; country: any; data: any[]; pagination: any } = {
+        success: false,
+        country: null,
+        data: [],
+        pagination: { totalItems: 0, totalPages: 1 },
+    };
     if (res.ok) {
         result = await res.json();
     }
 
-    const stories = result.data || [];
-    const totalStories = result.pagination?.totalItems || stories.length;
+    if (!result.country) {
+        notFound();
+    }
+
+    const { country, data: stories, pagination } = result;
+    const totalStories = result.pagination?.totalItems || pagination?.total || stories.length;
     const totalPages = result.pagination?.totalPages || Math.ceil(totalStories / limit);
 
     const animeData = stories.map((story: any) => {
@@ -35,7 +43,7 @@ export default async function AnimeBoPage(props: {
             id: story.id,
             title: story.title,
             slug: story.slug,
-            coverImage: story.coverImage || undefined,
+            coverImage: story.coverImage || story.thumbnail || undefined,
             rating: story.averageRating || story.rating || 0,
             quality: story.quality || 'HD',
             totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
@@ -50,10 +58,10 @@ export default async function AnimeBoPage(props: {
             <div className="lg:col-span-9 space-y-6">
                 <div className="bg-gray-800 rounded-lg p-6 mt-6 border-l-4 border-primary">
                     <h1 className="text-2xl font-bold text-white mb-2 uppercase flex items-center gap-2">
-                        📺 Anime Bộ
+                         Quốc Gia {country.name}
                     </h1>
                     <p className="text-gray-400">
-                        Danh sách các bộ Anime nhiều tập mới nhất được cập nhật trên hệ thống.
+                        Danh sách các bộ Anime thuộc quốc gia {country.name} mới nhất được cập nhật trên hệ thống.
                         Hiện có <span className="text-primary font-bold">{totalStories}</span> bộ phim.
                     </p>
                 </div>
@@ -75,7 +83,7 @@ export default async function AnimeBoPage(props: {
                     </>
                 ) : (
                     <div className="bg-gray-800 rounded-lg p-12 text-center">
-                        <p className="text-gray-400 text-lg">Đang cập nhật dữ liệu</p>
+                        <p className="text-gray-400 text-lg">Chưa có phim nào thuộc quốc gia này</p>
                     </div>
                 )}
             </div>

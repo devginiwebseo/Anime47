@@ -7,31 +7,18 @@ import { useState } from "react";
 
 const menuItems = [
     {
-        group: "Tổng Quan", items: [
-            { name: "Bảng Điều Khiển", href: "/admin" },
-        ]
-    },
-    {
-        group: "Quản Lý Nội Dung", items: [
-            { name: "Phim", href: "/admin/movies" },
-            { name: "Tập Phim", href: "/admin/chapters" },
-            { name: "Thể Loại", href: "/admin/genres" },
-            { name: "Diễn Viên", href: "/admin/actors" },
-            { name: "Tác Giả", href: "/admin/authors" },
-        ]
-    },
-    {
-        group: "Tương Tác", items: [
-            { name: "Bình Luận", href: "/admin/comments" },
+        group: "Tương Tác",
+        items: [
             { name: "Báo Cáo", href: "/admin/reports" },
-        ]
+        ],
     },
     {
-        group: "Hệ Thống", items: [
+        group: "Hệ Thống",
+        items: [
             { name: "Tài Khoản", href: "/admin/users" },
             { name: "Cài Đặt Chung", href: "/admin/settings" },
             { name: "Cài Đặt Trang Chủ", href: "/admin/settings/homepage" },
-        ]
+        ],
     },
 ];
 
@@ -46,7 +33,6 @@ export default function AdminSidebar() {
 
     return (
         <>
-            {/* Mobile Header Toggle */}
             <div className="md:hidden flex items-center justify-between p-4 bg-[#0F172A] text-white sticky top-0 z-30 shadow-md">
                 <Link href="/admin">
                     <h2 className="text-xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
@@ -68,7 +54,6 @@ export default function AdminSidebar() {
                 </button>
             </div>
 
-            {/* Mobile Overlay Backdrop */}
             {isMobileMenuOpen && (
                 <div
                     className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 md:hidden transition-opacity"
@@ -76,12 +61,13 @@ export default function AdminSidebar() {
                 />
             )}
 
-            {/* Sidebar (Fixed drawer on mobile, static column on desktop) */}
-            <aside className={`
+            <aside
+                className={`
                 fixed inset-y-0 left-0 z-50 w-72 bg-[#0F172A] text-white h-screen border-r border-slate-800 flex flex-col transition-transform duration-300 ease-in-out
-                ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} 
+                ${isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"} 
                 md:relative md:translate-x-0
-            `}>
+            `}
+            >
                 <div className="p-6 md:p-8 flex items-center justify-between border-b border-slate-800 md:border-none">
                     <Link href="/admin">
                         <h2 className="text-2xl font-black bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
@@ -91,7 +77,6 @@ export default function AdminSidebar() {
                             </span>
                         </h2>
                     </Link>
-                    {/* Close button for mobile within drawer */}
                     <button
                         onClick={() => setIsMobileMenuOpen(false)}
                         className="md:hidden p-2 text-slate-400 hover:text-white"
@@ -118,13 +103,19 @@ export default function AdminSidebar() {
                                                 key={item.href}
                                                 href={item.href}
                                                 onClick={() => setIsMobileMenuOpen(false)}
-                                                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${active
-                                                    ? "bg-blue-600/10 text-blue-400 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)]"
-                                                    : "text-slate-400 hover:text-white hover:bg-slate-800/50"
-                                                    }`}
+                                                className={`group flex items-center px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200 ${
+                                                    active
+                                                        ? "bg-blue-600/10 text-blue-400 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)]"
+                                                        : "text-slate-400 hover:text-white hover:bg-slate-800/50"
+                                                }`}
                                             >
-                                                <div className={`w-1.5 h-1.5 rounded-full mr-3 transition-all ${active ? "bg-blue-400 scale-100" : "bg-slate-600 group-hover:bg-slate-400 scale-50 group-hover:scale-75"
-                                                    }`} />
+                                                <div
+                                                    className={`w-1.5 h-1.5 rounded-full mr-3 transition-all ${
+                                                        active
+                                                            ? "bg-blue-400 scale-100"
+                                                            : "bg-slate-600 group-hover:bg-slate-400 scale-50 group-hover:scale-75"
+                                                    }`}
+                                                />
                                                 {item.name}
                                             </Link>
                                         );
