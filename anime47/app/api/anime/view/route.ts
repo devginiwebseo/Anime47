@@ -9,7 +9,7 @@ export async function POST(request: Request) {
             return NextResponse.json({ success: false, error: 'storyId is required' }, { status: 400 });
         }
 
-        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
+        const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Call External API via Server (Bypassing CORS)
         const res = await fetch(`${apiUrl}/api/public/view`, {

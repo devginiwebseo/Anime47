@@ -16,11 +16,11 @@ export default async function AnimeBoPage(props: {
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 20;
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&page=${currentPage}`, {
         next: { revalidate: 60 }
     });
-    
+
     let result = { success: false, data: [], pagination: { totalItems: 0, totalPages: 1 } };
     if (res.ok) {
         result = await res.json();

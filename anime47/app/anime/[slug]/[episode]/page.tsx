@@ -23,7 +23,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
         notFound();
     }
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
 
     // Fetch story data từ API
     const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {

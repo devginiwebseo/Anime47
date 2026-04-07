@@ -12,7 +12,7 @@ interface SectionProps {
 }
 
 export default async function NewReleasesSection({ title, limit = 20, numColumns = 5 }: SectionProps) {
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories mới nhất từ API
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}`, {
         next: { revalidate: 3600 }
@@ -50,7 +50,7 @@ export default async function NewReleasesSection({ title, limit = 20, numColumns
                             <AnimeCard key={anime.id} {...anime} />
                         ))}
                     </div>
-                    <SeeMoreButton href="/anime-bo"/>
+                    <SeeMoreButton href="/anime-bo" />
                 </div>
             ) : (
                 <div className="text-center py-12 text-gray-400">

@@ -16,6 +16,7 @@ const menuItems = [
         group: "Hệ Thống",
         items: [
             { name: "Tài Khoản", href: "/admin/users" },
+            { name: "Quản Lý Trang", href: "/admin/pages" },
             { name: "Cài Đặt Chung", href: "/admin/settings" },
             { name: "Cài Đặt Trang Chủ", href: "/admin/settings/homepage" },
         ],

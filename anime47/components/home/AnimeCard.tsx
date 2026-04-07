@@ -29,7 +29,7 @@ export default function AnimeCard({
 }: AnimeCardProps) {
     const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
 
-    const apiUrl = process.env.API_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://anime.datatruyen.online';
     const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 
     return (
@@ -39,7 +39,7 @@ export default function AnimeCard({
                 <div className="aspect-[2/3] relative bg-[#1c1d22]">
                     {coverImage ? (
                         <Image
-                            src={coverImage.includes('/upload/') ? `${baseUrl}${coverImage.substring(coverImage.indexOf('/upload/'))}` : coverImage}
+                            src={coverImage.startsWith('http') ? coverImage : `${baseUrl}${coverImage.startsWith('/') ? '' : '/'}${coverImage}`}
                             alt={title}
                             fill
                             className="object-cover"

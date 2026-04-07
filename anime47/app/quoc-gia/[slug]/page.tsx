@@ -14,7 +14,7 @@ export default async function CountryDetailPage(props: {
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 20;
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
     const res = await fetch(
         `${apiUrl}/api/public/countries?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
         { next: { revalidate: 60 } }
@@ -58,7 +58,7 @@ export default async function CountryDetailPage(props: {
             <div className="lg:col-span-9 space-y-6">
                 <div className="bg-gray-800 rounded-lg p-6 mt-6 border-l-4 border-primary">
                     <h1 className="text-2xl font-bold text-white mb-2 uppercase flex items-center gap-2">
-                         Quốc Gia {country.name}
+                        Quốc Gia {country.name}
                     </h1>
                     <p className="text-gray-400">
                         Danh sách các bộ Anime thuộc quốc gia {country.name} mới nhất được cập nhật trên hệ thống.

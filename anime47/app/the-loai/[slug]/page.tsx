@@ -12,7 +12,7 @@ export default async function GenrePage(props: {
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 10;
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
     const res = await fetch(`${apiUrl}/api/public/genres?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`, {
         next: { revalidate: 60 }
     });

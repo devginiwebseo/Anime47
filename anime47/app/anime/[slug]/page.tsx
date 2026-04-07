@@ -15,7 +15,7 @@ import { commentService } from '@/modules/comment/comment.service';
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
 
     // Fetch story data từ API
     const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
@@ -35,7 +35,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     // Format các thông tin phụ từ API
     const genres = story.genres ? story.genres.map((g: any) => g.name) : [];
     const chapters = story.chapters || [];
-    
+
     // Parse cast from string to array
     const castArray = story.cast ? story.cast.split(',').map((c: string) => c.trim()) : [];
 

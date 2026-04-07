@@ -15,7 +15,7 @@ interface SectionProps {
 export default async function CategorySection({ title, limit = 10, numColumns = 5, genreSlug }: SectionProps) {
     if (!genreSlug) return null;
 
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories theo genreSlug từ API
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&genre=${genreSlug}`, {
         next: { revalidate: 3600 }

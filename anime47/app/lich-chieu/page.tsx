@@ -30,7 +30,7 @@ function formatMovieCard(movie: any) {
 }
 
 export default async function SchedulePage() {
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
     const res = await fetch(`${apiUrl}/api/public/schedule`, {
         next: { revalidate: 60 },
     });

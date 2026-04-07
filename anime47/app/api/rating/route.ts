@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
+        const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Proxy to external API
         const res = await fetch(`${apiUrl}/api/public/rating`, {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
-        const apiUrl = (process.env.API_URL || 'https://api.animeez.online').replace(/\/$/, '');
+        const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         const externalRes = await fetch(`${apiUrl}/api/public/rating?${searchParams.toString()}`, {
             method: 'GET',

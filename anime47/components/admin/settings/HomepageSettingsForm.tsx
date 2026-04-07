@@ -1,6 +1,5 @@
 'use client';
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const blockTypes = [
     { type: 'INTRODUCTION', label: 'Khối Giới Thiệu', desc: 'Banner giới thiệu với slogan và mô tả', icon: '📝' },
@@ -15,11 +14,29 @@ const blockTypes = [
     { type: 'NOTICE', label: 'Khối Thông Báo/Ghi Chú', desc: 'Hiển thị thông báo, ghi chú nổi bật', icon: '📢' },
 ];
 
-export default function HomepageSettingsForm({ initialBlocks, genres }: any) {
+export default function HomepageSettingsForm({ initialBlocks, genres: initialGenres }: any) {
     const [blocks, setBlocks] = useState<any[]>(initialBlocks || []);
+    const [genres, setGenres] = useState<any[]>(initialGenres || []);
     const [saving, setSaving] = useState(false);
     const [success, setSuccess] = useState('');
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchGenres = async () => {
+            try {
+                const res = await fetch(`${process.env.API_URL}/api/public/genres`);
+                if (res.ok) {
+                    const result = await res.json();
+                    if (result.success) {
+                        setGenres(result.data || []);
+                    }
+                }
+            } catch (error) {
+                console.error('Lỗi fetch genres:', error);
+            }
+        };
+        fetchGenres();
+    }, []);
 
     const handleSave = async () => {
         setSaving(true);

@@ -13,9 +13,9 @@ interface SectionProps {
 }
 
 export default async function ComingSoonSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
-    // Lấy stories sắp chiếu từ API (giả sử có param status=trailer hoặc upcoming=true)
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&status=upcoming`, {
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
+    // Lấy stories sắp chiếu từ API
+    const res = await fetch(`${apiUrl}/api/public/genres?slug=anime-sap-chieu&limit=${limit}&page=1`, {
         next: { revalidate: 3600 }
     });
 
@@ -56,7 +56,7 @@ export default async function ComingSoonSection({ title, limit = 8, numColumns =
                         <AnimeCard key={anime.id} {...anime} />
                     ))}
                 </div>
-                <SeeMoreButton href="/sap-chieu" />
+                <SeeMoreButton href="the-loai/anime-sap-chieu" />
             </div>
         </section>
     );

@@ -1,6 +1,6 @@
 async function check() {
     try {
-        const res = await fetch("https://api.animeez.online/api/public/movies?limit=1");
+        const res = await fetch("https://anime.datatruyen.online/api/public/movies?limit=1");
         const data = await res.json();
         const movie = data.data?.[0];
         if (movie) {

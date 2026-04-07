@@ -11,12 +11,12 @@ interface SectionProps {
 }
 
 export default async function AnimeHotList({ title, limit = 10 }: SectionProps) {
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online/';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories hot từ API (có thể cần truyền thêm param sort=views)
     const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&sort=views`, {
         next: { revalidate: 3600 } // Tùy chỉnh bộ nhớ đệm
     });
-    
+
     let hotAnimeData = [];
     if (res.ok) {
         const result = await res.json();

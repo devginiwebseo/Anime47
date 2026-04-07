@@ -7,7 +7,7 @@ export const metadata = {
 };
 
 export default async function CountriesPage() {
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
     const res = await fetch(`${apiUrl}/api/public/countries`, {
         next: { revalidate: 60 },
     });
@@ -23,7 +23,7 @@ export default async function CountriesPage() {
         <div className="space-y-6">
             <div className="bg-gray-800 rounded-lg p-6 mt-6 border-l-4 border-primary">
                 <h1 className="text-2xl font-bold text-white mb-2 uppercase flex items-center gap-2">
-                     Quốc Gia
+                    Quốc Gia
                 </h1>
                 <p className="text-gray-400">
                     Khám phá anime theo quốc gia phát hành. Hiện có{' '}

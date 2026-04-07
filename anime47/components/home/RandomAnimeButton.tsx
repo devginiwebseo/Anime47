@@ -11,7 +11,8 @@ export default function RandomAnimeButton() {
         if (loading) return;
         setLoading(true);
         try {
-            const res = await fetch('/api/public/random');
+            const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://anime.datatruyen.online';
+            const res = await fetch(`${apiUrl}/api/public/random`);
             const data = await res.json();
             if (data.success && data.data) {
                 if (data.data.link) {

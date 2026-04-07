@@ -3,27 +3,60 @@ import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import AnimeCard from '@/components/home/AnimeCard';
 
+import { Metadata } from 'next';
+
+export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+    const { slug } = await props.params;
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
+
+    try {
+        const res = await fetch(
+            `${apiUrl}/api/public/directors?slug=${encodeURIComponent(slug)}&limit=1`,
+            { next: { revalidate: 60 } }
+        );
+        if (res.ok) {
+            const result = await res.json();
+            const director = result.director;
+            if (director) {
+                return {
+                    title: `Đạo diễn ${director.name} - Phim do ${director.name} đạo diễn | Anime47`,
+                    description: director.bio ? `${director.bio.substring(0, 160)}...` : `Tuyển tập các anime đặc sắc do đạo diễn ${director.name} thực hiện, xem phim chất lượng FHD vietsub.`,
+                    openGraph: {
+                        images: director.avatarUrl ? [director.avatarUrl] : [],
+                    }
+                };
+            }
+        }
+    } catch (e) {
+        // ignore
+    }
+
+    return {
+        title: 'Đạo diễn | Anime47',
+    };
+}
+
 export default async function DirectorPage(props: { params: Promise<{ slug: string }> }) {
     const { slug } = await props.params;
-    const apiUrl = process.env.API_URL || 'https://api.animeez.online';
+    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
 
     const res = await fetch(
         `${apiUrl}/api/public/directors?slug=${encodeURIComponent(slug)}&limit=20&page=1`,
         { next: { revalidate: 60 } }
     );
 
-    let result: { success: boolean; data: any[] } = { success: false, data: [] };
+    let result: { success: boolean; director?: any; data: any[] } = { success: false, data: [] };
     if (res.ok) {
         result = await res.json();
     }
 
-    const director = result.data.find((item: any) => item.slug === slug) || result.data[0];
+    const director = result.director;
 
     if (!director || director.slug !== slug) {
         notFound();
     }
 
-    const animeData = (director.movies || []).map((movie: any) => ({
+    const animeData = (result.data || []).map((movie: any) => ({
         id: movie.id,
         title: movie.title,
         slug: movie.slug,
@@ -37,7 +70,7 @@ export default async function DirectorPage(props: { params: Promise<{ slug: stri
     }));
 
     return (
-        <div className="space-y-8">
+        <div className="pt-[10px] md:pt-[30px] pb-12 px-2 md:px-4 lg:px-0 space-y-8">
             <div className="flex gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 p-2 rounded-lg w-max">
                 🏠 Anime47 <span className="text-gray-600">»</span> Đạo Diễn <span className="text-gray-600">»</span> <span className="text-white font-semibold">{director.name}</span>
             </div>
