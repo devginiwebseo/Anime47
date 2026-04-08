@@ -25,8 +25,8 @@ export async function POST(req: Request) {
         const filePath = path.join(uploadDir, filename);
         await writeFile(filePath, buffer);
 
-        // Return the public URL
-        const fileUrl = `/upload/pages/${filename}`;
+        // Return the dynamic API URL instead of static /upload to bypass proxy/static limits
+        const fileUrl = `/api/media?path=pages/${filename}`;
 
         return NextResponse.json({ success: true, url: fileUrl });
     } catch (error) {

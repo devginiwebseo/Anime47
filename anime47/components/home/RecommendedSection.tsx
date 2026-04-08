@@ -4,6 +4,8 @@ import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
 import SeeMoreButton from './SeeMoreButton';
 
+import { getGridColsClass } from '@/lib/helpers';
+
 interface SectionProps {
     title: string;
     limit?: number;
@@ -20,6 +22,8 @@ export default function RecommendedSection({ title, limit = 8, numColumns = 4 }:
     const [activeTab, setActiveTab] = useState(TABS[0].slug);
     const [animeData, setAnimeData] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const gridColsClass = getGridColsClass(numColumns);
 
     useEffect(() => {
         const fetchData = async () => {
@@ -76,14 +80,14 @@ export default function RecommendedSection({ title, limit = 8, numColumns = 4 }:
 
             <div className="space-y-4">
                 {loading ? (
-                    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-4 opacity-50`}>
+                    <div className={`grid grid-cols-2 md:grid-cols-3 ${gridColsClass} gap-4 opacity-50`}>
                         {/* Placeholder vắn tắt trong lúc load */}
                         {Array.from({ length: limit }).map((_, i) => (
                             <div key={i} className="animate-pulse bg-gray-800 rounded-lg aspect-[2/3] w-full"></div>
                         ))}
                     </div>
                 ) : animeData.length > 0 ? (
-                    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-4`}>
+                    <div className={`grid grid-cols-2 md:grid-cols-3 ${gridColsClass} gap-4`}>
                         {animeData.map((anime) => (
                             <AnimeCard key={anime.id} {...anime} />
                         ))}

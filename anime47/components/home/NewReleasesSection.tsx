@@ -5,6 +5,8 @@ import SeeMoreButton from './SeeMoreButton';
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
+import { getGridColsClass } from '@/lib/helpers';
+
 interface SectionProps {
     title: string;
     limit?: number;
@@ -39,13 +41,15 @@ export default async function NewReleasesSection({ title, limit = 20, numColumns
         });
     }
 
+    const gridColsClass = getGridColsClass(numColumns);
+
     return (
         <section className="mb-12">
             <SectionHeader title={title} icon="🆕" />
 
             {animeData.length > 0 ? (
                 <div className="space-y-6">
-                    <div className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-${Math.min(numColumns, 12)} gap-x-4 gap-y-8`}>
+                    <div className={`grid grid-cols-2 md:grid-cols-3 ${gridColsClass} gap-x-4 gap-y-8`}>
                         {animeData.map((anime) => (
                             <AnimeCard key={anime.id} {...anime} />
                         ))}

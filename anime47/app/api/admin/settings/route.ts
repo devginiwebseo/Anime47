@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
+import { revalidatePath } from 'next/cache';
 
 // GET: Lấy setting theo key
 export async function GET(request: NextRequest) {
@@ -45,6 +46,9 @@ export async function POST(request: NextRequest) {
                 updatedAt: new Date(),
             },
         });
+
+        // Revalidate toàn bộ site khi settings thay đổi
+        revalidatePath('/', 'layout');
 
         return NextResponse.json({ success: true, setting });
     } catch (error: any) {
