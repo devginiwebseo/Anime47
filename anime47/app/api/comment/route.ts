@@ -1,3 +1,4 @@
+import { fetchExternalApi } from '@/lib/external-api';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -6,7 +7,7 @@ export async function POST(request: NextRequest) {
         const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Forward to external API to bypass CORS
-        const res = await fetch(`${apiUrl}/api/public/comment`, {
+        const res = await fetchExternalApi('/api/public/comment', {
             method: 'POST',
             cache: 'no-cache',
             next: { revalidate: 0 },
@@ -35,7 +36,7 @@ export async function GET(request: NextRequest) {
         const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Redirect to external API via Server
-        const externalRes = await fetch(`${apiUrl}/api/public/comment?${searchParams.toString()}`, {
+        const externalRes = await fetchExternalApi(`/api/public/comment?${searchParams.toString()}`, {
             method: 'GET',
             cache: 'no-cache',
             next: { revalidate: 0 },

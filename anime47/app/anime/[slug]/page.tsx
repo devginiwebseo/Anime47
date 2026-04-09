@@ -12,13 +12,14 @@ import { slugify } from '@/lib/helpers';
 
 // Tạm giữ lại commentService vì bạn có thể chưa viết API riêng cho comments
 import { commentService } from '@/modules/comment/comment.service';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export default async function AnimeDetailPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params;
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
 
     // Fetch story data từ API
-    const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
+    const res = await fetchExternalApi(`/api/public/movies/${slug}`, {
         next: { revalidate: 3600 }
     });
 
@@ -78,7 +79,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     // Fetch related animes bằng API mới, truyền theo genre đầu tiên của phim
     let relatedAnimes: any[] = [];
     if (story.genres && story.genres.length > 0) {
-        const relatedRes = await fetch(`${apiUrl}/api/public/movies?limit=8&genre=${story.genres[0].slug}`, {
+        const relatedRes = await fetchExternalApi(`/api/public/movies?limit=8&genre=${story.genres[0].slug}`, {
             next: { revalidate: 3600 }
         });
         if (relatedRes.ok) {

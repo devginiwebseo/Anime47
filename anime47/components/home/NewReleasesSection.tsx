@@ -2,6 +2,7 @@ import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
 import SeeMoreButton from './SeeMoreButton';
+import { fetchExternalApi } from '@/lib/external-api';
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
@@ -16,7 +17,7 @@ interface SectionProps {
 export default async function NewReleasesSection({ title, limit = 20, numColumns = 5 }: SectionProps) {
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories mới nhất từ API
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}`, {
+    const res = await fetchExternalApi(`/api/public/movies?limit=${limit}`, {
         next: { revalidate: 3600 }
     });
 

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { logger } from '@/lib/logger';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export async function POST(request: Request) {
     try {
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
         const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Call External API via Server (Bypassing CORS)
-        const res = await fetch(`${apiUrl}/api/public/view`, {
+        const res = await fetchExternalApi('/api/public/view', {
             method: 'POST',
             cache: 'no-cache',
             next: { revalidate: 0 },

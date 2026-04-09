@@ -2,6 +2,7 @@ import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
 import SeeMoreButton from './SeeMoreButton';
+import { fetchExternalApi } from '@/lib/external-api';
 import { prisma } from '@/lib/prisma';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
@@ -16,7 +17,7 @@ interface SectionProps {
 export default async function CompletedSection({ title, limit = 10, numColumns = 5 }: SectionProps) {
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories đã hoàn thành
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&status=completed`, {
+    const res = await fetchExternalApi(`/api/public/movies?limit=${limit}&status=completed`, {
         next: { revalidate: 3600 }
     });
 

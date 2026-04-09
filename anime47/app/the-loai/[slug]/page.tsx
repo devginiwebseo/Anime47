@@ -2,22 +2,31 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import AnimeCard from '@/components/home/AnimeCard';
 import Pagination from '@/components/ui/Pagination';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export default async function GenrePage(props: {
-    params: Promise<{ slug: string }>,
-    searchParams: Promise<{ page?: string }>
+    params: Promise<{ slug: string }>;
+    searchParams: Promise<{ page?: string }>;
 }) {
     const { slug } = await props.params;
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 10;
 
-    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
-    const res = await fetch(`${apiUrl}/api/public/genres?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`, {
-        next: { revalidate: 60 }
-    });
+    const res = await fetchExternalApi(
+        `/api/public/genres?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
+        {
+            next: { revalidate: 60 },
+        }
+    );
 
-    let result: { success: boolean, genre: any, data: any[], pagination: any } = { success: false, genre: null, data: [], pagination: { totalItems: 0, totalPages: 1 } };
+    let result: { success: boolean; genre: any; data: any[]; pagination: any } = {
+        success: false,
+        genre: null,
+        data: [],
+        pagination: { totalItems: 0, totalPages: 1 },
+    };
+
     if (res.ok) {
         result = await res.json();
     }
@@ -30,57 +39,51 @@ export default async function GenrePage(props: {
     const totalStories = pagination?.totalItems || stories.length;
     const totalPages = pagination?.totalPages || Math.ceil(totalStories / limit);
 
-    const animeData = stories.map((story: any) => {
-        return {
-            id: story.id,
-            title: story.title,
-            slug: story.slug,
-            coverImage: story.coverImage || story.thumbnail || undefined,
-            rating: story.averageRating || story.rating || 0,
-            quality: story.quality || 'FHD',
-            totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
-            currentEpisode: story.latestChapter?.index || (story.totalEpisodes > 0 ? story.totalEpisodes : undefined),
-            isNew: false,
-            views: story.views || 0,
-        };
-    });
+    const animeData = stories.map((story: any) => ({
+        id: story.id,
+        title: story.title,
+        slug: story.slug,
+        coverImage: story.coverImage || story.thumbnail || undefined,
+        rating: story.averageRating || story.rating || 0,
+        quality: story.quality || 'FHD',
+        totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
+        currentEpisode:
+            story.latestChapter?.index || (story.totalEpisodes > 0 ? story.totalEpisodes : undefined),
+        isNew: false,
+        views: story.views || 0,
+    }));
 
     return (
-        <div className="space-y-6">
-            <div className="flex gap-2 text-sm text-gray-400 bg-gray-900 border border-gray-800 p-2 rounded-lg w-max mt-6">
-                🏠 Anime47 <span className="text-gray-600">»</span> Thể Loại <span className="text-gray-600">»</span> <span className="text-white font-semibold">{genre.name}</span>
+        <div className="space-y-5 sm:space-y-6">
+            <div className="mt-4 flex w-fit flex-wrap gap-2 rounded-lg border border-gray-800 bg-gray-900 px-3 py-2 text-xs text-gray-400 sm:mt-6 sm:text-sm">
+                Anime47 <span className="text-gray-600">/</span> The loai <span className="text-gray-600">/</span>{' '}
+                <span className="font-semibold text-white">{genre.name}</span>
             </div>
 
-            <div className="bg-gray-800 rounded-lg p-6 border-l-4 border-primary">
-                <h1 className="text-2xl font-bold text-white mb-2 uppercase">
-                    Thể Loại: {genre.name}
+            <div className="rounded-lg border-l-4 border-primary bg-gray-800 p-4 sm:p-5 lg:p-6">
+                <h1 className="mb-2 text-xl font-bold uppercase text-white sm:text-2xl">
+                    The loai: {genre.name}
                 </h1>
-                <p className="text-gray-400">
-                    {genre.description || `Danh sách các phim anime thể loại ${genre.name}. Cập nhật liên tục những bộ phim mới nhất, hay nhất.`}
+                <p className="text-sm text-gray-400 sm:text-base">
+                    {genre.description ||
+                        `Danh sach anime the loai ${genre.name}. Cap nhat lien tuc nhung bo phim moi va duoc xem nhieu.`}
                 </p>
-                <div className="mt-2 text-sm text-primary font-semibold">
-                    Tìm thấy {totalStories} bộ phim
-                </div>
+                <div className="mt-2 text-sm font-semibold text-primary">Tim thay {totalStories} bo phim</div>
             </div>
 
             {animeData.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-5">
                         {animeData.map((anime) => (
                             <AnimeCard key={anime.id} {...anime} />
                         ))}
                     </div>
 
-                    {totalPages > 1 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                        />
-                    )}
+                    {totalPages > 1 && <Pagination currentPage={currentPage} totalPages={totalPages} />}
                 </>
             ) : (
-                <div className="bg-gray-800 rounded-lg p-12 text-center text-gray-400">
-                    Chưa có phim nào thuộc thể loại này
+                <div className="rounded-lg bg-gray-800 p-8 text-center text-sm text-gray-400 sm:p-12 sm:text-base">
+                    Chua co phim nao thuoc the loai nay
                 </div>
             )}
         </div>

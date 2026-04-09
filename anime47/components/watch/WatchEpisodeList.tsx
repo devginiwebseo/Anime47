@@ -1,5 +1,9 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { getSiteDisplayName } from '@/lib/site-branding';
 
 interface Episode {
     id: string;
@@ -15,6 +19,9 @@ interface WatchEpisodeListProps {
 }
 
 export default function WatchEpisodeList({ animeSlug, episodes, currentEpisode, animeTitle }: WatchEpisodeListProps) {
+    const { settings } = useSiteSettings();
+    const siteDisplayName = getSiteDisplayName(settings);
+
     return (
         <div className="bg-[#14151a] rounded-lg p-6">
             <h2 className="text-primary text-xl font-bold mb-6">
@@ -45,10 +52,10 @@ export default function WatchEpisodeList({ animeSlug, episodes, currentEpisode, 
                 </div>
             )}
 
-            {/* Note box matching screenshot */}
             <div className="mt-8 border border-primary/40 bg-[#1c1d22]/50 rounded-lg p-4 text-center">
                 <p className="text-gray-300 text-sm">
-                    Xem tập mới tại <span className="text-white font-bold">anime47.tv</span>, tìm ngay cú pháp 👉 <span className="text-primary font-bold">{animeTitle || 'Phim này'} anime47</span>
+                    Xem tập mới tại <span className="text-white font-bold">{siteDisplayName}</span>, tìm ngay cú pháp{' '}
+                    <span className="text-primary font-bold">{animeTitle || 'Phim này'} {siteDisplayName}</span>
                 </p>
             </div>
         </div>

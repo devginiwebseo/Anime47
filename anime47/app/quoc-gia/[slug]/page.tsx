@@ -1,9 +1,10 @@
-﻿import React from 'react';
+import React from 'react';
 import { notFound } from 'next/navigation';
 import AnimeCard from '@/components/home/AnimeCard';
 import Pagination from '@/components/ui/Pagination';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export default async function CountryDetailPage(props: {
     params: Promise<{ slug: string }>;

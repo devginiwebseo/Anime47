@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState } from 'react';
-import Link from 'next/link';
 import SearchBar from '../ui/SearchBar';
 import Logo from '../ui/Logo';
 import Navigation from '../ui/Navigation';
@@ -24,27 +23,32 @@ export default function Header() {
                 </div>
             )}
             {/* Top Header with Logo, Navigation, and Search */}
-            <div className="container mx-auto px-4 py-3">
-                <div className="flex items-center justify-between gap-4 md:gap-8">
+            <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
+                <div className="flex items-center gap-2 sm:gap-3 lg:gap-8">
 
                     {/* Mobile Hamburger Button */}
                     <button
                         onClick={toggleMobileMenu}
-                        className="lg:hidden p-2.5 rounded-lg transition-colors shadow-sm"
+                        className="lg:hidden shrink-0 p-2.5 rounded-lg transition-colors shadow-sm"
                         style={{ backgroundColor: primaryColor }}
                     >
-                        <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                         </svg>
                     </button>
 
-                    {/* Logo - Centered on Mobile */}
-                    <div className="flex-1 flex justify-center lg:justify-start lg:flex-none">
-                        <Logo src={settings.header.logoUrl || '/logo.png'} />
+                    {/* Logo */}
+                    <div className="shrink-0">
+                        <Logo src={settings.header.logoUrl || '/logo.png'} compact />
+                    </div>
+
+                    {/* Mobile Search Bar */}
+                    <div className="min-w-0 flex-1 lg:hidden">
+                        {settings.header.showSearch && <SearchBar compact />}
                     </div>
 
                     {/* Desktop Navigation */}
-                    <div className="hidden lg:block flex-1">
+                    <div className="hidden lg:block flex-1 min-w-0">
                         <Navigation menuItems={settings.header.menuItems} />
                     </div>
 
@@ -52,9 +56,6 @@ export default function Header() {
                     <div className="hidden lg:block w-full max-w-sm">
                         {settings.header.showSearch && <SearchBar />}
                     </div>
-
-                    {/* Mobile helper div to keep logo centered */}
-                    <div className="w-11 lg:hidden"></div>
                 </div>
             </div>
 
@@ -66,8 +67,8 @@ export default function Header() {
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Mobile Menu Header */}
-                        <div className="flex items-center justify-between p-4 border-b border-gray-800">
-                            <Logo src={settings.header.logoUrl || '/logo.png'} />
+                        <div className="flex items-center justify-between gap-3 p-4 border-b border-gray-800">
+                            <Logo src={settings.header.logoUrl || '/logo.png'} compact />
                             <button onClick={toggleMobileMenu} className="p-2 text-gray-400 hover:text-white transition-colors">
                                 <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -79,7 +80,7 @@ export default function Header() {
                         <div className="flex-1 overflow-y-auto custom-scrollbar p-5 space-y-6">
                             {settings.header.showSearch && (
                                 <div className="w-full">
-                                    <SearchBar />
+                                    <SearchBar compact />
                                 </div>
                             )}
 

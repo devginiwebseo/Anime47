@@ -2,16 +2,15 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import AnimeCard from '@/components/home/AnimeCard';
-
 import { Metadata } from 'next';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export async function generateMetadata(props: { params: Promise<{ slug: string }> }): Promise<Metadata> {
     const { slug } = await props.params;
-    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
 
     try {
-        const res = await fetch(
-            `${apiUrl}/api/public/directors?slug=${encodeURIComponent(slug)}&limit=1`,
+        const res = await fetchExternalApi(
+            `/api/public/directors?slug=${encodeURIComponent(slug)}&limit=1`,
             { next: { revalidate: 60 } }
         );
         if (res.ok) {
@@ -38,10 +37,9 @@ export async function generateMetadata(props: { params: Promise<{ slug: string }
 
 export default async function DirectorPage(props: { params: Promise<{ slug: string }> }) {
     const { slug } = await props.params;
-    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
 
-    const res = await fetch(
-        `${apiUrl}/api/public/directors?slug=${encodeURIComponent(slug)}&limit=20&page=1`,
+    const res = await fetchExternalApi(
+        `/api/public/directors?slug=${encodeURIComponent(slug)}&limit=20&page=1`,
         { next: { revalidate: 60 } }
     );
 

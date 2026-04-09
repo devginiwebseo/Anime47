@@ -23,8 +23,8 @@ export default function WatchRelatedAnime({ animes }: WatchRelatedAnimeProps) {
 
     return (
         <div className="bg-gray-800 rounded-lg p-4">
-            <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                🎬 Phim Liên Quan
+            <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
+                Phim Liên Quan
             </h3>
 
             <div className="space-y-3">

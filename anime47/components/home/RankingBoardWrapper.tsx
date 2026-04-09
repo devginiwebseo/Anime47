@@ -1,5 +1,6 @@
 import React from 'react';
 import RankingBoard from './RankingBoard';
+import { fetchExternalApi } from '@/lib/external-api';
 import { prisma } from '@/lib/prisma';
 
 type TabType = 'HOT NGÀY' | 'THÁNG' | 'NĂM';
@@ -19,7 +20,7 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
     const fetchRanking = async (period: 'day' | 'month' | 'year') => {
         const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
         try {
-            const res = await fetch(`${apiUrl}/api/public/movies?limit=10&sort=views&period=${period}`, {
+            const res = await fetchExternalApi(`/api/public/movies?limit=10&sort=views&period=${period}`, {
                 next: { revalidate: 3600 }
             });
             if (res.ok) {

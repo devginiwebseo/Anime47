@@ -138,14 +138,14 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
     };
 
     return (
-        <div id="comments" className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-white text-xl font-bold mb-4">
-                💬 Bình luận ({comments.length})
+        <div id="comments" className="rounded-lg bg-gray-800 p-4 sm:p-5 lg:p-6">
+            <h2 className="mb-4 text-lg font-bold text-white sm:text-xl">
+                 Bình luận ({comments.length})
             </h2>
 
             {/* Comment Form */}
             <form onSubmit={handleSubmit} className="mb-6">
-                <div className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                <div className="rounded-lg border border-gray-700 bg-gray-900 p-3 sm:p-4">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
                         {/* Author Name */}
                         <div>
@@ -154,7 +154,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                 value={authorName}
                                 onChange={(e) => setAuthorName(e.target.value)}
                                 placeholder="Tên của bạn *"
-                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none"
+                                className="w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 text-sm text-white focus:border-primary focus:outline-none sm:p-3 sm:text-base"
                             />
                         </div>
 
@@ -165,7 +165,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email của bạn (Không bắt buộc)"
-                                className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none"
+                                className="w-full rounded-lg border border-gray-700 bg-gray-800 p-2.5 text-sm text-white focus:border-primary focus:outline-none sm:p-3 sm:text-base"
                             />
                         </div>
                     </div>
@@ -179,7 +179,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                     key={star}
                                     type="button"
                                     onClick={() => setRating(star)}
-                                    className="text-2xl transition-transform hover:scale-110"
+                                    className="text-xl transition-transform hover:scale-110 sm:text-2xl"
                                 >
                                     {star <= rating ? '⭐' : '☆'}
                                 </button>
@@ -192,7 +192,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         placeholder="Nội dung bình luận của bạn..."
-                        className="w-full bg-gray-800 text-white rounded p-3 border border-gray-700 focus:border-primary focus:outline-none resize-none"
+                        className="w-full resize-none rounded-lg border border-gray-700 bg-gray-800 p-2.5 text-sm text-white focus:border-primary focus:outline-none sm:p-3 sm:text-base"
                         rows={4}
                     />
 
@@ -214,7 +214,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                         <button
                             type="submit"
                             disabled={isSubmitting || !newComment.trim() || !authorName.trim()}
-                            className="bg-primary hover:brightness-110 disabled:bg-gray-700 disabled:cursor-not-allowed text-white px-6 py-2 rounded font-semibold transition-colors"
+                            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:brightness-110 disabled:cursor-not-allowed disabled:bg-gray-700 sm:px-6 sm:text-base"
                         >
                             {isSubmitting ? 'Đang gửi...' : 'Gửi bình luận'}
                         </button>
@@ -226,10 +226,10 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
             <div className="space-y-4">
                 {displayComments.length > 0 ? (
                     displayComments.map((comment) => (
-                        <div key={comment.id} className="bg-gray-900 rounded-lg p-4 border border-gray-700">
+                        <div key={comment.id} className="rounded-lg border border-gray-700 bg-gray-900 p-3 sm:p-4">
                             <div className="flex items-start gap-3">
                                 {/* Avatar */}
-                                <div className="w-10 h-10 rounded-full bg-gray-700 flex items-center justify-center flex-shrink-0">
+                                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-gray-700 sm:h-10 sm:w-10">
                                     {comment.avatar ? (
                                         <img src={comment.avatar} alt={comment.author} className="w-full h-full rounded-full" />
                                     ) : (
@@ -240,7 +240,7 @@ export default function CommentSection({ storyId, comments = [] }: CommentSectio
                                 {/* Content */}
                                 <div className="flex-1">
                                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                        <span className="text-white font-semibold">{comment.author}</span>
+                                        <span className="text-sm font-semibold text-white sm:text-base">{comment.author}</span>
                                         {comment.rating && (
                                             <span className="text-yellow-400 text-sm">
                                                 {'⭐'.repeat(comment.rating)}

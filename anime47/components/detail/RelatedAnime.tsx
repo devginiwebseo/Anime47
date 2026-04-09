@@ -19,13 +19,13 @@ interface RelatedAnimeProps {
 
 export default function RelatedAnime({ animes }: RelatedAnimeProps) {
     return (
-        <div className="bg-gray-800 rounded-lg p-6">
-            <h2 className="text-white text-2xl font-bold mb-6 flex items-center gap-2">
-                🎬 PHIM LIÊN QUAN
+        <div className="rounded-lg bg-gray-800 p-4 sm:p-5 lg:p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-primary sm:mb-6 sm:text-2xl">
+                 PHIM LIÊN QUAN
             </h2>
 
             {animes.length > 0 ? (
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 md:grid-cols-4">
                     {animes.map((anime) => (
                         <AnimeCard
                             key={anime.id}

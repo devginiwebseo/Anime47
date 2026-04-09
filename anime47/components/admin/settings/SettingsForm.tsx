@@ -176,7 +176,7 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                     onClick={() => setActiveTab('theme')}
                     className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${activeTab === 'theme' ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
                 >
-                    ⚙️ Cài đặt trang web
+                    Cài đặt trang web
                 </button>
             </div>
 

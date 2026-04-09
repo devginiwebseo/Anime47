@@ -6,6 +6,7 @@ import WatchEpisodeList from '@/components/watch/WatchEpisodeList';
 import WatchRelatedAnime from '@/components/watch/WatchRelatedAnime';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
+import { fetchExternalApi } from '@/lib/external-api';
 
 interface WatchPageProps {
     params: Promise<{
@@ -26,7 +27,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
 
     // Fetch story data từ API
-    const res = await fetch(`${apiUrl}/api/public/movies/${slug}`, {
+    const res = await fetchExternalApi(`/api/public/movies/${slug}`, {
         next: { revalidate: 3600 }
     });
 
@@ -86,7 +87,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
     // Fetch related anime
     let relatedAnimes: any[] = [];
     if (story.genres && story.genres.length > 0) {
-        const relatedRes = await fetch(`${apiUrl}/api/public/movies?limit=6&genre=${story.genres[0].slug}`, {
+        const relatedRes = await fetchExternalApi(`/api/public/movies?limit=6&genre=${story.genres[0].slug}`, {
             next: { revalidate: 3600 }
         });
         if (relatedRes.ok) {
@@ -148,6 +149,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
                             animeSlug={story.slug}
                             episodes={episodeList}
                             currentEpisode={currentEpisode}
+                            animeTitle={story.title}
                         />
                     </div>
                 </div>

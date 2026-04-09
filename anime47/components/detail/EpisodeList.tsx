@@ -16,19 +16,19 @@ interface EpisodeListProps {
 
 export default function EpisodeList({ animeSlug, episodes, currentEpisode }: EpisodeListProps) {
     return (
-        <div className="bg-[#1c1d22] rounded-lg p-6 border border-gray-800">
-            <h2 className="text-white text-xl font-bold mb-5 flex items-center gap-2">
-                📺 Danh sách tập phim
+        <div className="bg-[#1c1d22] rounded-lg border border-gray-800 p-4 sm:p-5 lg:p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-lg font-bold text-primary sm:mb-5 sm:text-xl">
+                 Danh sách tập phim
             </h2>
 
             {episodes.length > 0 ? (
-                <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3">
+                <div className="grid grid-cols-3 gap-2 sm:grid-cols-5 sm:gap-3 md:grid-cols-6 lg:grid-cols-10">
                     {episodes.map((episode) => (
                         <Link
                             key={episode.id}
                             href={`/anime/${animeSlug}/tap-${episode.number}`}
                             className={`
-                                py-2.5 px-3 rounded-md font-semibold text-sm text-center transition-colors duration-200
+                                rounded-md px-2.5 py-2 text-center text-xs font-semibold transition-colors duration-200 sm:px-3 sm:py-2.5 sm:text-sm
                                 ${currentEpisode === episode.number
                                     ? 'bg-primary text-white shadow-xl'
                                     : episode.isWatched
@@ -48,7 +48,7 @@ export default function EpisodeList({ animeSlug, episodes, currentEpisode }: Epi
             )}
 
             {/* Note for users */}
-            <div className="mt-6 p-4 bg-[#14151a] rounded-r border-l-4 border-primary text-sm text-gray-400 shadow-inner">
+            <div className="mt-5 rounded-r border-l-4 border-primary bg-[#14151a] p-3 text-xs text-gray-400 shadow-inner sm:mt-6 sm:p-4 sm:text-sm">
                 <p>💡 <span className="text-white font-semibold">Lưu ý:</span> Xem hết tập này sẽ tự chuyển sang tập tiếp theo. Tình trạng xem sẽ được lưu lại để tiện cho lần xem sau.</p>
             </div>
         </div>

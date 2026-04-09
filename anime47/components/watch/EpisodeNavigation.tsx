@@ -2,6 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { getSiteDisplayName } from '@/lib/site-branding';
 
 interface EpisodeNavigationProps {
     animeTitle: string;
@@ -20,12 +22,15 @@ export default function EpisodeNavigation({
     hasNextEpisode,
     hasPrevEpisode,
 }: EpisodeNavigationProps) {
+    const { settings } = useSiteSettings();
+    const siteDisplayName = getSiteDisplayName(settings);
+
     return (
         <div className="space-y-5 p-6">
             {/* Breadcrumb */}
             <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
                 <Link href="/" className="hover:text-primary transition-colors">
-                    🏠 Anime47
+                    {siteDisplayName}
                 </Link>
                 <span>▶</span>
                 <Link href="/anime" className="hover:text-primary transition-colors">

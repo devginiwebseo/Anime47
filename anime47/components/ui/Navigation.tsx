@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -26,6 +26,7 @@ export default function Navigation({
 }) {
     const pathname = usePathname();
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
+    const closeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
     const toggleDropdown = (index: number) => {
         if (activeDropdown === index) {
@@ -33,6 +34,26 @@ export default function Navigation({
         } else {
             setActiveDropdown(index);
         }
+    };
+
+    const openDropdown = (index: number) => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+            closeTimeoutRef.current = null;
+        }
+
+        setActiveDropdown(index);
+    };
+
+    const closeDropdownWithDelay = () => {
+        if (closeTimeoutRef.current) {
+            clearTimeout(closeTimeoutRef.current);
+        }
+
+        closeTimeoutRef.current = setTimeout(() => {
+            setActiveDropdown(null);
+            closeTimeoutRef.current = null;
+        }, 120);
     };
 
     return (
@@ -46,8 +67,8 @@ export default function Navigation({
                         <li
                             key={`${item.label}-${index}`}
                             className={`relative group ${isMobile ? 'w-full' : ''}`}
-                            onMouseEnter={() => !isMobile && item.submenu && setActiveDropdown(index)}
-                            onMouseLeave={() => !isMobile && setActiveDropdown(null)}
+                            onMouseEnter={() => !isMobile && item.submenu && openDropdown(index)}
+                            onMouseLeave={() => !isMobile && closeDropdownWithDelay()}
                         >
                             <div className={`flex items-center justify-between ${isMobile ? 'w-full border-b border-gray-800/50' : ''}`}>
                                 <Link

@@ -2,6 +2,7 @@ import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
 import SeeMoreButton from './SeeMoreButton';
+import { fetchExternalApi } from '@/lib/external-api';
 import { prisma } from '@/lib/prisma';
 import { chapterService } from '@/modules/chapter/chapter.service';
 
@@ -19,7 +20,7 @@ export default async function CategorySection({ title, limit = 10, numColumns = 
 
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories theo genreSlug từ API
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&genre=${genreSlug}`, {
+    const res = await fetchExternalApi(`/api/public/movies?limit=${limit}&genre=${genreSlug}`, {
         next: { revalidate: 3600 }
     });
 

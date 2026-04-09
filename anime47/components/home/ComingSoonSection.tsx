@@ -2,6 +2,7 @@ import React from 'react';
 import AnimeCard from './AnimeCard';
 import SectionHeader from './SectionHeader';
 import SeeMoreButton from './SeeMoreButton';
+import { fetchExternalApi } from '@/lib/external-api';
 
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
@@ -17,7 +18,7 @@ interface SectionProps {
 export default async function ComingSoonSection({ title, limit = 8, numColumns = 4 }: SectionProps) {
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories sắp chiếu từ API
-    const res = await fetch(`${apiUrl}/api/public/genres?slug=anime-sap-chieu&limit=${limit}&page=1`, {
+    const res = await fetchExternalApi(`/api/public/genres?slug=anime-sap-chieu&limit=${limit}&page=1`, {
         next: { revalidate: 3600 }
     });
 

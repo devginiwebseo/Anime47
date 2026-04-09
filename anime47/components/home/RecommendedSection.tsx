@@ -29,8 +29,7 @@ export default function RecommendedSection({ title, limit = 8, numColumns = 4 }:
         const fetchData = async () => {
             setLoading(true);
             try {
-                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://anime.datatruyen.online';
-                const res = await fetch(`${apiUrl}/api/public/genres?slug=${activeTab}&limit=${limit}&page=1`);
+                const res = await fetch(`/api/public/genres?slug=${activeTab}&limit=${limit}&page=1`);
                 if (res.ok) {
                     const result = await res.json();
                     const stories = result.data || [];

@@ -24,6 +24,7 @@ export interface SiteSettings {
     primaryColor: string;
     backgroundColor: string;
     isIndexed: boolean;
+    siteTitle?: string;
   };
 }
 
@@ -46,6 +47,7 @@ const defaultSettings: SiteSettings = {
     primaryColor: '#d32f2f', // Default red
     backgroundColor: '#111827', // Default gray-900
     isIndexed: false,
+    siteTitle: '',
   }
 };
 

@@ -12,7 +12,10 @@ interface AnimeCardProps {
     totalEpisodes?: number;
     currentEpisode?: number;
     isNew?: boolean;
-    views?: number;
+    views?: number | string | null;
+    totalViews?: number | string | null;
+    viewCount?: number | string | null;
+    total_views?: number | string | null;
 }
 
 export default function AnimeCard({
@@ -26,14 +29,18 @@ export default function AnimeCard({
     currentEpisode,
     isNew = false,
     views = 0,
+    totalViews,
+    viewCount,
+    total_views,
 }: AnimeCardProps) {
+    const normalizedViews = Number(views ?? totalViews ?? viewCount ?? total_views ?? 0) || 0;
     const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
 
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://anime.datatruyen.online';
     const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
 
     return (
-        <Link href={`/anime/${slug}`} className="group block">
+        <Link href={`/anime/${slug}/`} className="group block">
             <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
                 {/* Cover Image */}
                 <div className="aspect-[2/3] relative bg-[#1c1d22]">
@@ -80,7 +87,7 @@ export default function AnimeCard({
 
                         {/* Views Bottom Right */}
                         <div className="bg-black/60 backdrop-blur-md text-white px-1.5 py-0.5 rounded text-[10px] font-bold border border-white/10 whitespace-nowrap">
-                            Lượt xem: {views > 999 ? `${(views / 1000).toFixed(1)}K` : views}
+                            Lượt xem: {normalizedViews.toLocaleString('vi-VN')}
                         </div>
                     </div>
                 </div>

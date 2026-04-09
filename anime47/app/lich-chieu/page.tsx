@@ -1,6 +1,7 @@
-﻿import React from 'react';
+import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { fetchExternalApi } from '@/lib/external-api';
 
 export const metadata = {
     title: 'Lịch Chiếu - Anime47',
@@ -30,8 +31,7 @@ function formatMovieCard(movie: any) {
 }
 
 export default async function SchedulePage() {
-    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
-    const res = await fetch(`${apiUrl}/api/public/schedule`, {
+    const res = await fetchExternalApi('/api/public/schedule', {
         next: { revalidate: 60 },
     });
 

@@ -1,3 +1,4 @@
+import { fetchExternalApi } from '@/lib/external-api';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
@@ -6,7 +7,7 @@ export async function POST(request: NextRequest) {
         const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
         // Proxy to external API
-        const res = await fetch(`${apiUrl}/api/public/rating`, {
+        const res = await fetchExternalApi('/api/public/rating', {
             method: 'POST',
             cache: 'no-cache',
             next: { revalidate: 0 },
@@ -34,7 +35,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const apiUrl = (process.env.API_URL || 'https://anime.datatruyen.online').replace(/\/$/, '');
 
-        const externalRes = await fetch(`${apiUrl}/api/public/rating?${searchParams.toString()}`, {
+        const externalRes = await fetchExternalApi(`/api/public/rating?${searchParams.toString()}`, {
             method: 'GET',
             cache: 'no-cache',
             next: { revalidate: 0 },

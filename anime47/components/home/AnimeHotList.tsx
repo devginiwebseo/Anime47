@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { fetchExternalApi } from '@/lib/external-api';
 import { storyService } from '@/modules/story/story.service';
 import { chapterService } from '@/modules/chapter/chapter.service';
 import RandomAnimeButton from './RandomAnimeButton';
@@ -13,7 +14,7 @@ interface SectionProps {
 export default async function AnimeHotList({ title, limit = 10 }: SectionProps) {
     const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online/';
     // Lấy stories hot từ API (có thể cần truyền thêm param sort=views)
-    const res = await fetch(`${apiUrl}/api/public/movies?limit=${limit}&sort=views`, {
+    const res = await fetchExternalApi(`/api/public/movies?limit=${limit}&sort=views`, {
         next: { revalidate: 3600 } // Tùy chỉnh bộ nhớ đệm
     });
 
