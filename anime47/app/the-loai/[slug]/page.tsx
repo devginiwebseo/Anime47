@@ -62,13 +62,13 @@ export default async function GenrePage(props: {
 
             <div className="rounded-lg border-l-4 border-primary bg-gray-800 p-4 sm:p-5 lg:p-6">
                 <h1 className="mb-2 text-xl font-bold uppercase text-white sm:text-2xl">
-                    The loai: {genre.name}
+                    Thể loại: {genre.name}
                 </h1>
                 <p className="text-sm text-gray-400 sm:text-base">
                     {genre.description ||
-                        `Danh sach anime the loai ${genre.name}. Cap nhat lien tuc nhung bo phim moi va duoc xem nhieu.`}
+                        `Danh sách anime thể loại ${genre.name}. Cập nhật liên tục những bộ phim mới và được xem nhiều.`}
                 </p>
-                <div className="mt-2 text-sm font-semibold text-primary">Tim thay {totalStories} bo phim</div>
+                <div className="mt-2 text-sm font-semibold text-primary">Tìm thấy {totalStories} bộ phim</div>
             </div>
 
             {animeData.length > 0 ? (
@@ -83,7 +83,7 @@ export default async function GenrePage(props: {
                 </>
             ) : (
                 <div className="rounded-lg bg-gray-800 p-8 text-center text-sm text-gray-400 sm:p-12 sm:text-base">
-                    Chua co phim nao thuoc the loai nay
+                    Chưa có phim nào thuộc thể loại này
                 </div>
             )}
         </div>

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { slugify } from '@/lib/helpers';
 import { useSiteSettings } from '@/hooks/useSiteSettings';
 import { useEffect } from 'react';
+import { resolveImageUrl, shouldBypassNextImageOptimization } from '@/lib/image-url';
 
 interface AnimeDetailHeaderProps {
     title: string;
@@ -46,6 +47,9 @@ export default function AnimeDetailHeader({
     views = 0,
     storyId,
 }: AnimeDetailHeaderProps) {
+    const resolvedCoverImage = resolveImageUrl(coverImage);
+    const bypassOptimization = shouldBypassNextImageOptimization(coverImage);
+
     const handleShare = () => {
         if (typeof window !== 'undefined') {
             navigator.clipboard.writeText(window.location.href);
@@ -77,13 +81,14 @@ export default function AnimeDetailHeader({
                 {/* Left Column: Poster & Watch Button */}
                 <div className="w-full max-w-[220px] sm:max-w-[260px] md:w-[240px] lg:w-[280px] shrink-0 flex flex-col gap-3 md:gap-4 mx-auto md:mx-0">
                     <div className="aspect-[2/3] relative rounded-lg overflow-hidden shadow-2xl border border-gray-700">
-                        {coverImage ? (
+                        {resolvedCoverImage ? (
                             <Image
-                                src={coverImage}
+                                src={resolvedCoverImage}
                                 alt={title}
                                 fill
                                 className="object-cover"
                                 priority
+                                unoptimized={bypassOptimization}
                             />
                         ) : (
                             <div className="absolute inset-0 flex items-center justify-center bg-gray-800">

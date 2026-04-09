@@ -24,7 +24,7 @@ export default function RandomAnimeButton() {
                 if (data.data.link) {
                     router.push(data.data.link);
                 } else if (data.data.slug) {
-                    router.push(`/anime/${data.data.slug}`);
+                    router.push(`/anime/${data.data.slug}/`);
                 }
             }
         } catch (error) {

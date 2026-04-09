@@ -1,6 +1,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { resolveImageUrl, shouldBypassNextImageOptimization } from '@/lib/image-url';
 
 interface AnimeCardProps {
     id: string;
@@ -36,22 +37,23 @@ export default function AnimeCard({
     const normalizedViews = Number(views ?? totalViews ?? viewCount ?? total_views ?? 0) || 0;
     const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
 
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || process.env.API_URL || 'https://anime.datatruyen.online';
-    const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
+    const resolvedCoverImage = resolveImageUrl(coverImage);
+    const bypassOptimization = shouldBypassNextImageOptimization(coverImage);
 
     return (
         <Link href={`/anime/${slug}/`} className="group block">
             <div className="relative overflow-hidden rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105 group-hover:-translate-y-1">
                 {/* Cover Image */}
                 <div className="aspect-[2/3] relative bg-[#1c1d22]">
-                    {coverImage ? (
+                    {resolvedCoverImage ? (
                         <Image
-                            src={coverImage.startsWith('http') ? coverImage : `${baseUrl}${coverImage.startsWith('/') ? '' : '/'}${coverImage}`}
+                            src={resolvedCoverImage}
                             alt={title}
                             fill
                             className="object-cover"
                             sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
                             priority
+                            unoptimized={bypassOptimization}
                         />
                     ) : (
                         <div className="absolute inset-0 flex items-center justify-center">
