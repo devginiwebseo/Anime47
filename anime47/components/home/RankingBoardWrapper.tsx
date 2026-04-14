@@ -56,7 +56,7 @@ async function getRankingData(): Promise<Record<TabType, RankingAnime[]>> {
 
             let imageUrl = story.coverImage || '';
             if (imageUrl && imageUrl.includes('/upload/')) {
-                imageUrl = `${apiUrl}${imageUrl.substring(imageUrl.indexOf('/upload/'))}`;
+                imageUrl = `/proxy-images${imageUrl.substring(imageUrl.indexOf('/upload/') + 7)}`;
             }
 
             return {

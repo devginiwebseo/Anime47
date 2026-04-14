@@ -42,6 +42,11 @@ export default async function AnimeBoPage(props: {
         isNew: false,
         views: story.views || 0,
         status: story.status,
+        year: story.releaseYear || undefined,
+        genres: story.genres?.map((g: any) => g.name || g) || undefined,
+        director: story.director || undefined,
+        cast: story.cast || undefined,
+        duration: story.duration || undefined,
     }));
 
     return (

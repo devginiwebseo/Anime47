@@ -80,10 +80,7 @@ export default async function Home() {
                     </Suspense>
                 ))}
 
-                {/* Fix: Nếu admin chưa add vào danh sách, nhưng user vẫn muốn default có ở sidebar? 
-                    Tuy nhiên hiện tại ta đang theo logic Admin quản lý. 
-                    Nếu danh sách trống, ta có thể hiển thị mặc định nếu bạn muốn. 
-                */}
+              
             </div>
         </div>
     );

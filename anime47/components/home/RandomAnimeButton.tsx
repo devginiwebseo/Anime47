@@ -35,15 +35,17 @@ export default function RandomAnimeButton() {
     };
 
     return (
-        <button
-            onClick={handleRandom}
-            disabled={loading}
-            className="w-full mt-6 bg-primary hover:brightness-110 text-white py-3 px-4 rounded-xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-70"
-        >
-            <span className={`text-lg ${loading ? 'animate-spin' : ''}`}>🎲</span>
-            <span className="uppercase tracking-tight">
-                {loading ? 'Đang tìm phim...' : 'Xem anime ngẫu nhiên'}
-            </span>
-        </button>
+        <div className="random-anime-btn">
+            <button
+                onClick={handleRandom}
+                disabled={loading}
+                className="w-full mt-6 bg-primary hover:brightness-110 text-white py-3 px-4 rounded-xl font-black text-sm transition-all duration-300 flex items-center justify-center gap-2 shadow-lg shadow-primary/20 active:scale-95 disabled:opacity-70"
+            >
+                <span className={`text-lg ${loading ? 'animate-spin' : ''}`}>🎲</span>
+                <span className="uppercase tracking-tight">
+                    {loading ? 'Đang tìm phim...' : 'Xem anime ngẫu nhiên'}
+                </span>
+            </button>
+        </div>
     );
 }

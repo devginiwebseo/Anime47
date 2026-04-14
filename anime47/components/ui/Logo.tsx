@@ -25,13 +25,13 @@ export default function Logo({ src, compact = false }: LogoProps) {
     const showImage = !isDefault && !error;
 
     const imageSizeClass = compact
-        ? 'w-[112px] h-[40px] sm:w-[132px] sm:h-[46px] md:w-[160px] md:h-[56px]'
+        ? 'w-[130px] h-[50px] sm:w-[132px] sm:h-[46px] md:w-[180px] md:h-[70px]'
         : 'w-[132px] h-[48px] sm:w-[160px] sm:h-[60px] md:w-[200px] md:h-[80px]';
     const textSizeClass = compact ? 'text-lg sm:text-xl' : 'text-xl sm:text-2xl';
 
     return (
         <Link href="/" className="flex-shrink-0">
-            <div className="relative h-auto max-h-[100px] flex items-center">
+            <div className="relative h-auto max-h-[130px] flex items-center">
                 {showImage ? (
                     <div className={`relative ${imageSizeClass}`}>
                         <Image

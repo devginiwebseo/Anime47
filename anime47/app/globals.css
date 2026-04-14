@@ -35,18 +35,43 @@ body {
 
 @layer utilities {
   @keyframes fadeIn {
-    from {
-      opacity: 0;
-      transform: translateY(10px) translateX(-50%);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
 
-    to {
-      opacity: 1;
-      transform: translateY(0) translateX(-50%);
-    }
+  @keyframes fadeInLeft {
+    from { opacity: 0; transform: translateX(-20px); }
+    to { opacity: 1; transform: translateX(0); }
   }
 
   .animate-fadeIn {
-    animation: fadeIn 0.15s ease-out forwards;
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+
+  .animate-fadeInLeft {
+    animation: fadeInLeft 0.4s ease-out forwards;
+  }
+}
+
+/* Theater Mode SideBar Expansion Grids */
+@media (min-width: 1024px) {
+  /* Related anime: 4 cols card grid */
+  #watch-sidebar.lg\:col-span-12 .anime-related-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+  }
+  /* Hot List: 5 cols horizontal list */
+  #watch-sidebar.lg\:col-span-12 .anime-hot-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  /* Ranking: 5 cols horizontal list */
+  #watch-sidebar.lg\:col-span-12 .anime-ranking-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 12px;
+  }
+  /* In theater/expanded mode, hide the RandomAnimeButton to save space */
+  #watch-sidebar.lg\:col-span-12 .random-anime-btn {
+    display: none;
   }
 }

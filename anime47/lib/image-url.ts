@@ -21,7 +21,11 @@ export function resolveImageUrl(imageUrl?: string) {
     }
 
     if (trimmedUrl.includes('/upload/')) {
-        return `${getBaseApiUrl()}${trimmedUrl.substring(trimmedUrl.indexOf('/upload/'))}`;
+        return `/proxy-images${trimmedUrl.substring(trimmedUrl.indexOf('/upload/') + 7)}`;
+    }
+
+    if (trimmedUrl.startsWith('/proxy-images/')) {
+        return trimmedUrl;
     }
 
     return `${getBaseApiUrl()}${trimmedUrl.startsWith('/') ? '' : '/'}${trimmedUrl}`;

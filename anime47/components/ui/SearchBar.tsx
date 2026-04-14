@@ -116,7 +116,7 @@ export default function SearchBar({ compact = false, className = '' }: SearchBar
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                    placeholder="Tim anime..."
+                    placeholder="Tìm anime..."
                     className={inputClasses}
                 />
                 <button

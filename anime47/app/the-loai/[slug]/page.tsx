@@ -11,7 +11,7 @@ export default async function GenrePage(props: {
     const { slug } = await props.params;
     const searchParams = await props.searchParams;
     const currentPage = parseInt(searchParams.page || '1');
-    const limit = 10;
+    const limit = 20;
 
     const res = await fetchExternalApi(
         `/api/public/genres?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
@@ -52,6 +52,11 @@ export default async function GenrePage(props: {
         isNew: false,
         views: story.views || 0,
         status: story.status,
+        year: story.releaseYear || undefined,
+        genres: story.genres?.map((g: any) => g.name || g) || undefined,
+        director: story.director || undefined,
+        cast: story.cast || undefined,
+        duration: story.duration || undefined,
     }));
 
     return (

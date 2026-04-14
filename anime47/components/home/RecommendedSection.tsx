@@ -38,13 +38,18 @@ export default function RecommendedSection({ title, limit = 8, numColumns = 4 }:
                         id: story.id,
                         title: story.title,
                         slug: story.slug,
-                        coverImage: story.coverImage || undefined,
-                        rating: story.averageRating || undefined,
-                        quality: story.quality || 'HD',
+                        coverImage: story.coverImage || story.thumbnail || undefined,
+                        rating: story.averageRating || story.rating || undefined,
+                        quality: story.quality || 'FHD',
                         totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
-                        currentEpisode: story.latestChapter?.index || undefined,
-                        isNew: false,
+                        currentEpisode: story.latestChapter?.index || (story.totalEpisodes > 0 ? story.totalEpisodes : undefined),
+                        isNew: story.isNew || false,
                         status: story.status,
+                        year: story.releaseYear || undefined,
+                        genres: story.genres?.map((g: any) => g.name || g) || undefined,
+                        director: story.director || undefined,
+                        cast: story.cast || undefined,
+                        duration: story.duration || undefined,
                     }));
                     setAnimeData(formattedData);
                 }

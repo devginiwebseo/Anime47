@@ -11,6 +11,11 @@ interface Anime {
     totalEpisodes?: number;
     currentEpisode?: number;
     isNew?: boolean;
+    year?: number;
+    genres?: string[];
+    director?: string;
+    cast?: string;
+    duration?: string;
 }
 
 interface RelatedAnimeProps {
@@ -19,8 +24,8 @@ interface RelatedAnimeProps {
 
 export default function RelatedAnime({ animes }: RelatedAnimeProps) {
     return (
-        <div className="rounded-lg bg-gray-800 p-4 sm:p-5 lg:p-6">
-            <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-primary sm:mb-6 sm:text-2xl">
+        <div className="rounded-lg p-4 sm:p-5 lg:p-6">
+            <h2 className="mb-4 flex items-center gap-2 text-xl font-bold text-primary sm:mb-6 sm:text-2xl border-b pb-2">
                  PHIM LIÊN QUAN
             </h2>
 
@@ -38,6 +43,11 @@ export default function RelatedAnime({ animes }: RelatedAnimeProps) {
                             totalEpisodes={anime.totalEpisodes}
                             currentEpisode={anime.currentEpisode}
                             isNew={anime.isNew}
+                            year={anime.year}
+                            genres={anime.genres}
+                            director={anime.director}
+                            cast={anime.cast}
+                            duration={anime.duration}
                         />
                     ))}
                 </div>

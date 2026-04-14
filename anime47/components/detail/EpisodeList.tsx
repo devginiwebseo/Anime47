@@ -28,7 +28,7 @@ export default function EpisodeList({ animeSlug, episodes, currentEpisode }: Epi
                             key={episode.id}
                             href={`/anime/${animeSlug}/tap-${episode.number}`}
                             className={`
-                                rounded-md px-2.5 py-2 text-center text-xs font-semibold transition-colors duration-200 sm:px-3 sm:py-2.5 sm:text-sm
+                                rounded-md px-1 py-2 text-center text-[11px] font-semibold transition-colors duration-200 sm:px-2 sm:py-2.5 sm:text-xs md:text-sm whitespace-nowrap
                                 ${currentEpisode === episode.number
                                     ? 'bg-primary text-white shadow-xl'
                                     : episode.isWatched

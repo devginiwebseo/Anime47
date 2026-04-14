@@ -26,73 +26,34 @@ export default function EpisodeNavigation({
     const siteDisplayName = getSiteDisplayName(settings);
 
     return (
-        <div className="space-y-5 p-6">
-            {/* Breadcrumb */}
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-400">
-                <Link href="/" className="hover:text-primary transition-colors">
+        <div className="space-y-4">
+            {/* Breadcrumb Container */}
+            <div className="bg-[#1a1c23] border border-gray-800 rounded px-4 py-2.5 flex flex-wrap items-center gap-2 text-[13px] text-gray-300">
+                <Link href="/" className="hover:text-primary transition-colors flex items-center gap-1.5 font-bold text-primary text-[16px]">
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" style={{ marginTop: '-2px' }}>
+                        <path d="M12 3L1 12h3v9h6v-6h4v6h6v-9h3L12 3z"/>
+                    </svg>
                     {siteDisplayName}
                 </Link>
-                <span>▶</span>
-                <Link href="/anime" className="hover:text-primary transition-colors">
+                <span className="text-gray-500 font-bold mx-0.5">»</span>
+                <Link href="/anime" className="hover:text-primary transition-colors font-bold text-primary">
                     Anime Bộ
                 </Link>
-                <span>▶</span>
+                <span className="text-gray-500 font-bold mx-0.5">»</span>
                 <Link
                     href={`/anime/${animeSlug}`}
-                    className="hover:text-primary transition-colors line-clamp-1"
+                    className="hover:text-primary transition-colors font-bold text-primary line-clamp-1 max-w-[200px] sm:max-w-[400px]"
                 >
                     {animeTitle}
                 </Link>
-                <span>▶</span>
-                <span className="text-primary font-semibold">Tập {currentEpisode}</span>
+                <span className="text-gray-500 font-bold mx-0.5">»</span>
+                <span className="text-white font-bold">Tập {currentEpisode}</span>
             </div>
 
             {/* Episode Title */}
-            <h1 className="text-2xl md:text-3xl font-bold text-primary">
+            <h1 className="text-2xl md:text-[28px] font-bold text-primary my-[50px]">
                 {animeTitle} - Tập {currentEpisode}
             </h1>
-
-            {/* Controls */}
-            <div className="flex flex-wrap items-center gap-3">
-                {/* Previous Episode */}
-                {hasPrevEpisode ? (
-                    <Link
-                        href={`/anime/${animeSlug}/tap-${currentEpisode - 1}`}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-semibold transition-colors flex items-center gap-2"
-                    >
-                        « Tập trước
-                    </Link>
-                ) : (
-                    <button
-                        disabled
-                        className="bg-gray-800 text-gray-600 px-4 py-2 rounded text-sm font-semibold cursor-not-allowed"
-                    >
-                        « Tập trước
-                    </button>
-                )}
-
-                {/* Next Episode */}
-                {hasNextEpisode ? (
-                    <Link
-                        href={`/anime/${animeSlug}/tap-${currentEpisode + 1}`}
-                        className="bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded text-sm font-semibold transition-colors flex items-center gap-2"
-                    >
-                        Tập tiếp »
-                    </Link>
-                ) : (
-                    <button
-                        disabled
-                        className="bg-gray-800 text-gray-600 px-4 py-2 rounded text-sm font-semibold cursor-not-allowed"
-                    >
-                        Tập tiếp »
-                    </button>
-                )}
-
-                {/* Server Selection */}
-                <button className="text-white px-4 py-2 rounded text-sm font-semibold transition-colors shadow-[0_4px_14px_0_rgba(211,47,47,0.39)]" style={{ backgroundColor: 'var(--theme-primary, #d32f2f)' }}>
-                    SERVER 1
-                </button>
-            </div>
         </div>
     );
 }

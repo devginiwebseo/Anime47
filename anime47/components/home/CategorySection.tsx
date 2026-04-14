@@ -43,6 +43,11 @@ export default async function CategorySection({ title, limit = 10, numColumns = 
                 currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
                 status: story.status,
+                year: story.releaseYear || undefined,
+                genres: story.genres?.map((g: any) => g.name || g) || undefined,
+                director: story.director || undefined,
+                cast: story.cast || undefined,
+                duration: story.duration || undefined,
             };
         });
     } else {

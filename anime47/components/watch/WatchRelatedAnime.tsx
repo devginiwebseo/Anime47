@@ -1,15 +1,20 @@
 import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import AnimeCard from '@/components/home/AnimeCard';
 
 interface RelatedAnime {
     id: string;
     title: string;
     slug: string;
     coverImage?: string;
+    rating?: number;
     quality?: string;
     currentEpisode?: number;
     totalEpisodes?: number;
+    year?: number;
+    genres?: string[];
+    director?: string;
+    cast?: string;
+    duration?: string;
 }
 
 interface WatchRelatedAnimeProps {
@@ -22,56 +27,32 @@ export default function WatchRelatedAnime({ animes }: WatchRelatedAnimeProps) {
     }
 
     return (
-        <div className="bg-gray-800 rounded-lg p-4">
-            <h3 className="text-lg font-bold text-primary mb-4 flex items-center gap-2">
-                Phim Liên Quan
-            </h3>
+        <div className="rounded-xl">
+            <div className="relative mb-6 pb-2">
+                <h3 className="text-lg md:text-2xl font-bold text-primary uppercase tracking-wider inline-block relative">
+                    Phim Liên Quan
+                    <div className="absolute -bottom-[9px] left-0 w-full h-[2px] bg-primary"></div>
+                </h3>
+            </div>
 
-            <div className="space-y-3">
-                {animes.slice(0, 6).map((anime) => (
-                    <Link
+            <div className="anime-related-grid grid grid-cols-2 gap-4 gap-y-6">
+                {animes.map((anime) => (
+                    <AnimeCard
                         key={anime.id}
-                        href={`/anime/${anime.slug}`}
-                        className="flex gap-3 group hover:bg-gray-700/50 p-2 rounded transition-all duration-200"
-                    >
-                        {/* Thumbnail */}
-                        <div className="relative w-16 h-20 flex-shrink-0 rounded overflow-hidden">
-                            {anime.coverImage ? (
-                                <Image
-                                    src={anime.coverImage}
-                                    alt={anime.title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="64px"
-                                />
-                            ) : (
-                                <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-900 flex items-center justify-center">
-                                    <span className="text-gray-500 text-lg">🎬</span>
-                                </div>
-                            )}
-
-                            {/* Quality Badge */}
-                            {anime.quality && (
-                                <div className="absolute top-1 left-1 bg-primary text-white text-[10px] px-1 rounded">
-                                    {anime.quality}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Info */}
-                        <div className="flex-1 min-w-0">
-                            <h4 className="text-white font-medium text-sm line-clamp-2 group-hover:text-primary transition-colors">
-                                {anime.title}
-                            </h4>
-                            {anime.currentEpisode && (
-                                <p className="text-gray-400 text-xs mt-1">
-                                    {anime.totalEpisodes
-                                        ? `Tập ${anime.currentEpisode}/${anime.totalEpisodes}`
-                                        : `Tập ${anime.currentEpisode}`}
-                                </p>
-                            )}
-                        </div>
-                    </Link>
+                        id={anime.id}
+                        title={anime.title}
+                        slug={anime.slug}
+                        coverImage={anime.coverImage}
+                        rating={anime.rating}
+                        quality={anime.quality}
+                        currentEpisode={anime.currentEpisode}
+                        totalEpisodes={anime.totalEpisodes}
+                        year={anime.year}
+                        genres={anime.genres}
+                        director={anime.director}
+                        cast={anime.cast}
+                        duration={anime.duration}
+                    />
                 ))}
             </div>
         </div>

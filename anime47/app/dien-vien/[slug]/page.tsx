@@ -66,6 +66,10 @@ export default async function ActorPage(props: { params: Promise<{ slug: string 
         isNew: false,
         views: movie.views || 0,
         status: movie.status,
+        year: movie.releaseYear || undefined,
+        genres: movie.genres?.map((g: any) => g.name || g) || undefined,
+        cast: movie.cast || actor?.name || undefined,
+        duration: movie.duration || undefined,
     }));
 
     return (

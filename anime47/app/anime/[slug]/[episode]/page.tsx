@@ -7,6 +7,8 @@ import WatchRelatedAnime from '@/components/watch/WatchRelatedAnime';
 import AnimeHotList from '@/components/home/AnimeHotList';
 import RankingBoardWrapper from '@/components/home/RankingBoardWrapper';
 import { fetchExternalApi } from '@/lib/external-api';
+import RelatedAnime from '@/components/detail/RelatedAnime';
+import CommentSection from '@/components/detail/CommentSection';
 
 interface WatchPageProps {
     params: Promise<{
@@ -77,8 +79,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
     // Fix relative URL for coverImage local
     const formatImage = (url?: string) => {
         if (url && url.includes('/upload/')) {
-            const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-            return `${baseUrl}${url.substring(url.indexOf('/upload/'))}`;
+            return `/proxy-images${url.substring(url.indexOf('/upload/') + 7)}`;
         }
         return url;
     };
@@ -101,6 +102,11 @@ export default async function WatchPage({ params }: WatchPageProps) {
                 quality: s.quality || 'HD',
                 currentEpisode: s.latestChapter?.index,
                 totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,
+                year: s.releaseYear || undefined,
+                genres: s.genres?.map((g: any) => g.name || g) || undefined,
+                director: s.director || undefined,
+                cast: s.cast || undefined,
+                duration: s.duration || undefined,
             }));
         }
     }
@@ -110,7 +116,7 @@ export default async function WatchPage({ params }: WatchPageProps) {
             {/* Video Player Section */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
                 {/* Main Content - 8 columns */}
-                <div className="lg:col-span-8 space-y-6">
+                <div id="watch-main-col" className="lg:col-span-9 space-y-6 transition-all duration-300">
                     {/* Navigation Controls */}
                     <div className="px-4 md:px-0">
                         <EpisodeNavigation
@@ -152,11 +158,18 @@ export default async function WatchPage({ params }: WatchPageProps) {
                             animeTitle={story.title}
                         />
                     </div>
+
+                    <div>
+                        <CommentSection storyId={story.id} comments={story.comments || []} />
+                    </div>
+
+                    <div>
+                        <RelatedAnime animes={relatedAnimes} />
+                    </div>
                 </div>
 
                 {/* Sidebar - 4 columns */}
-                <aside className="lg:col-span-4 space-y-6 px-4 md:px-0">
-                    <WatchRelatedAnime animes={relatedAnimes} />
+                <aside id="watch-sidebar" className="lg:col-span-3 space-y-6 px-4 md:px-0 transition-all duration-300">
                     <AnimeHotList title="ANIME HOT" />
                     <RankingBoardWrapper />
                 </aside>

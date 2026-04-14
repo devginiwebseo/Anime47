@@ -68,8 +68,7 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
     // Fix relative URL for coverImage
     const formatImage = (url?: string) => {
         if (url && url.includes('/upload/')) {
-            const baseUrl = apiUrl.endsWith('/') ? apiUrl.slice(0, -1) : apiUrl;
-            return `${baseUrl}${url.substring(url.indexOf('/upload/'))}`;
+            return `/proxy-images${url.substring(url.indexOf('/upload/') + 7)}`;
         }
         return url;
     };
@@ -94,6 +93,11 @@ export default async function AnimeDetailPage({ params }: { params: Promise<{ sl
                 totalEpisodes: s.totalEpisodes > 0 ? s.totalEpisodes : undefined,
                 currentEpisode: s.latestChapter?.index,
                 isNew: false,
+                year: s.releaseYear || undefined,
+                genres: s.genres?.map((g: any) => g.name || g) || undefined,
+                director: s.director || undefined,
+                cast: s.cast || undefined,
+                duration: s.duration || undefined,
             }));
         }
     }

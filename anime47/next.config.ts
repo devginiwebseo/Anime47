@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
   images: {
     remotePatterns: [
-     
       {
         protocol: 'http',
         hostname: 'localhost',
@@ -18,6 +17,14 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+  },
+  async rewrites() {
+    return [
+      {
+        source: '/proxy-images/:path*',
+        destination: 'https://anime.datatruyen.online/upload/:path*',
+      },
+    ];
   },
 };
 

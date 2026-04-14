@@ -66,6 +66,11 @@ export default async function DirectorPage(props: { params: Promise<{ slug: stri
         isNew: false,
         views: movie.views || 0,
         status: movie.status,
+        year: movie.releaseYear || undefined,
+        genres: movie.genres?.map((g: any) => g.name || g) || undefined,
+        director: movie.director || director?.name || undefined,
+        cast: movie.cast || undefined,
+        duration: movie.duration || undefined,
     }));
 
     return (
