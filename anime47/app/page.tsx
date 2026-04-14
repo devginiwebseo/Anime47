@@ -9,35 +9,32 @@ import CompletedSection from '@/components/home/CompletedSection';
 import IntroductionBlock from '@/components/home/IntroductionBlock';
 import NoticeBlock from '@/components/home/NoticeBlock';
 import UspBlock from '@/components/home/UspBlock';
-
 import { Suspense } from 'react';
 
-export const revalidate = 3600; // Tự động làm mới dữ liệu trang chủ mỗi 1 tiếng (3600 giây)
+export const revalidate = 3600;
+
+const defaultBlocks = [
+    { id: 'default-new', type: 'NEW_RELEASES', isHidden: false, title: 'ANIME MOI CAP NHAT', numColumns: 5, limit: 20 },
+    { id: 'default-soon', type: 'COMING_SOON', isHidden: false, title: 'ANIME SAP CHIEU', numColumns: 4, limit: 8 },
+    { id: 'default-recommended', type: 'RECOMMENDED', isHidden: false, title: 'ANIME DE CU', numColumns: 4, limit: 8 },
+    { id: 'default-hot', type: 'HOT', isHidden: false, title: 'ANIME HOT', limit: 10 },
+    { id: 'default-ranking', type: 'RANKING', isHidden: false, title: 'BANG XEP HANG' },
+];
 
 export default async function Home() {
-    // Lấy config các khối trang chủ
-    const homepageSetting = await prisma.settings.findUnique({ where: { key: 'homepage_blocks' } });
+    let homepageSetting = null;
 
-    // Tạo Default Layout như ban đầu nếu Admin chưa thiết lập
-    let blocks = homepageSetting?.value ? (homepageSetting.value as any) : null;
-
-    if (!blocks) {
-        blocks = [
-            { id: 'default-new', type: 'NEW_RELEASES', isHidden: false, title: 'ANIME MỚI CẬP NHẬT', numColumns: 5, limit: 20 },
-            { id: 'default-soon', type: 'COMING_SOON', isHidden: false, title: 'ANIME SẮP CHIẾU', numColumns: 4, limit: 8 },
-            { id: 'default-recommended', type: 'RECOMMENDED', isHidden: false, title: 'ANIME ĐỀ CỬ', numColumns: 4, limit: 8 },
-            { id: 'default-hot', type: 'HOT', isHidden: false, title: 'ANIME HOT', limit: 10 },
-            { id: 'default-ranking', type: 'RANKING', isHidden: false, title: 'BẢNG XẾP HẠNG' }
-        ];
+    try {
+        homepageSetting = await prisma.settings.findUnique({ where: { key: 'homepage_blocks' } });
+    } catch (error) {
+        console.error('Failed to load homepage blocks, using defaults.', error);
     }
 
-    // Render linh động theo Cấu hình
-    const validBlocks = blocks.filter((b: any) => !b.isHidden);
-
-    // Tách riêng các khối chính và sidebar
-    const mainBlocks = validBlocks.filter((b: any) => b.type !== 'HOT' && b.type !== 'RANKING');
-    const hotBlocks = validBlocks.filter((b: any) => b.type === 'HOT');
-    const rankingBlocks = validBlocks.filter((b: any) => b.type === 'RANKING');
+    const blocks = homepageSetting?.value ? (homepageSetting.value as any) : defaultBlocks;
+    const validBlocks = blocks.filter((block: any) => !block.isHidden);
+    const mainBlocks = validBlocks.filter((block: any) => block.type !== 'HOT' && block.type !== 'RANKING');
+    const hotBlocks = validBlocks.filter((block: any) => block.type === 'HOT');
+    const rankingBlocks = validBlocks.filter((block: any) => block.type === 'RANKING');
 
     const Fallback = () => <div className="h-64 animate-pulse bg-gray-800 rounded-xl" />;
 
@@ -79,8 +76,6 @@ export default async function Home() {
                         <RankingBoardWrapper title={block.title} />
                     </Suspense>
                 ))}
-
-              
             </div>
         </div>
     );

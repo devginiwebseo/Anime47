@@ -87,15 +87,7 @@ function HotAnimeItem({ anime, apiUrl }: { anime: HotAnime; apiUrl: string }) {
                         )}
                     </div>
                     {/* Genre pills */}
-                    {genreList.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-1.5">
-                            {genreList.map((g, i) => (
-                                <span key={i} className="bg-gray-800 text-gray-400 text-[9px] px-1.5 py-0.5 rounded-full border border-gray-700/40">
-                                    {g}
-                                </span>
-                            ))}
-                        </div>
-                    )}
+                  
                 </div>
             </Link>
 

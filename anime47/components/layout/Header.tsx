@@ -62,7 +62,7 @@ export default function Header() {
                     </div>
 
                     {/* Desktop User Actions */}
-                    <div className="hidden lg:flex items-center gap-3 shrink-0">
+                    {/* <div className="hidden lg:flex items-center gap-3 shrink-0">
                         {session ? (
                             <div className="relative">
                                 <button
@@ -140,7 +140,7 @@ export default function Header() {
                                 </Link>
                             </>
                         )}
-                    </div>
+                    </div> */}
                 </div>
             </div>
 
