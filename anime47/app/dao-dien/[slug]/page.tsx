@@ -65,6 +65,7 @@ export default async function DirectorPage(props: { params: Promise<{ slug: stri
         currentEpisode: movie.latestChapter?.index || (movie.totalEpisodes > 0 ? movie.totalEpisodes : undefined),
         isNew: false,
         views: movie.views || 0,
+        status: movie.status,
     }));
 
     return (

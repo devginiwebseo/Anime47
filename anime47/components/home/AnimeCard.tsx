@@ -13,6 +13,7 @@ interface AnimeCardProps {
     totalEpisodes?: number;
     currentEpisode?: number;
     isNew?: boolean;
+    status?: string;
     views?: number | string | null;
     totalViews?: number | string | null;
     viewCount?: number | string | null;
@@ -29,13 +30,23 @@ export default function AnimeCard({
     totalEpisodes,
     currentEpisode,
     isNew = false,
+    status,
     views = 0,
     totalViews,
     viewCount,
     total_views,
 }: AnimeCardProps) {
     const normalizedViews = Number(views ?? totalViews ?? viewCount ?? total_views ?? 0) || 0;
-    const statusText = totalEpisodes && currentEpisode === totalEpisodes ? 'FULL' : (currentEpisode ? `TẬP ${currentEpisode}` : (isNew ? 'MỚI' : ''));
+    
+    // Logic hiển thị block trạng thái/tập phim
+    let statusText = '';
+    if (status === 'completed' || status === 'Hoàn thành' || status === 'Full') {
+        statusText = 'FULL';
+    } else if (currentEpisode) {
+        statusText = `TẬP ${currentEpisode}`;
+    } else if (isNew) {
+        statusText = 'MỚI';
+    }
 
     const resolvedCoverImage = resolveImageUrl(coverImage);
     const bypassOptimization = shouldBypassNextImageOptimization(coverImage);

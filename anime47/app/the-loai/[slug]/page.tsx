@@ -51,6 +51,7 @@ export default async function GenrePage(props: {
             story.latestChapter?.index || (story.totalEpisodes > 0 ? story.totalEpisodes : undefined),
         isNew: false,
         views: story.views || 0,
+        status: story.status,
     }));
 
     return (

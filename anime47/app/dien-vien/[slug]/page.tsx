@@ -65,6 +65,7 @@ export default async function ActorPage(props: { params: Promise<{ slug: string 
         currentEpisode: movie.latestChapter?.index || (movie.totalEpisodes > 0 ? movie.totalEpisodes : undefined),
         isNew: false,
         views: movie.views || 0,
+        status: movie.status,
     }));
 
     return (

@@ -38,6 +38,7 @@ export default async function NewReleasesSection({ title, limit = 20, numColumns
                 currentEpisode: story.latestChapter?.index || undefined,
                 isNew: true, // Stories mới nhất
                 views: story.views || 0,
+                status: story.status,
             };
         });
     }

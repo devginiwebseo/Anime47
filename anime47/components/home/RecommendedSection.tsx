@@ -44,6 +44,7 @@ export default function RecommendedSection({ title, limit = 8, numColumns = 4 }:
                         totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
                         currentEpisode: story.latestChapter?.index || undefined,
                         isNew: false,
+                        status: story.status,
                     }));
                     setAnimeData(formattedData);
                 }

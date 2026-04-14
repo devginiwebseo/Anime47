@@ -50,6 +50,7 @@ export default async function CountryDetailPage(props: {
             currentEpisode: story.latestChapter?.index || undefined,
             isNew: false,
             views: story.views || 0,
+            status: story.status,
         };
     });
 

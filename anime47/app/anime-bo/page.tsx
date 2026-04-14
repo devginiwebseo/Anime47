@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import AnimeCard from '@/components/home/AnimeCard';
 import Pagination from '@/components/ui/Pagination';
 import AnimeHotList from '@/components/home/AnimeHotList';
@@ -41,6 +41,7 @@ export default async function AnimeBoPage(props: {
         currentEpisode: story.latestChapter?.index || undefined,
         isNew: false,
         views: story.views || 0,
+        status: story.status,
     }));
 
     return (

@@ -42,6 +42,7 @@ export default async function CategorySection({ title, limit = 10, numColumns = 
                 totalEpisodes: story.totalEpisodes > 0 ? story.totalEpisodes : undefined,
                 currentEpisode: story.latestChapter?.index || undefined,
                 isNew: false,
+                status: story.status,
             };
         });
     } else {
