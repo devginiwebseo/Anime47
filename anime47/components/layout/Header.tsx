@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import SearchBar from '../ui/SearchBar';
 import Logo from '../ui/Logo';
 import Navigation from '../ui/Navigation';
+import LoginModal from '../ui/LoginModal';
 import { useSettings } from '@/components/providers/SettingsProvider';
 import { useSession, signOut } from 'next-auth/react';
 import Link from 'next/link';
@@ -13,13 +14,15 @@ export default function Header() {
     const { data: session } = useSession();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
 
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
     const toggleUserMenu = () => setIsUserMenuOpen(!isUserMenuOpen);
     const primaryColor = settings.theme.primaryColor || '#d32f2f';
 
     return (
-        <header className="sticky top-0 z-50 border-b border-gray-800 text-white" style={{ backgroundColor: settings.theme.backgroundColor }}>
+        <>
+            <header className="sticky top-0 z-50 border-b border-gray-800 text-white" style={{ backgroundColor: settings.theme.backgroundColor }}>
             {/* Announcement Bar if any */}
             {settings.header.announcement && (
                 <div className="text-white text-center py-1 text-sm font-medium tracking-wide" style={{ backgroundColor: settings.theme.primaryColor }}>
@@ -28,7 +31,7 @@ export default function Header() {
             )}
             {/* Top Header with Logo, Navigation, and Search */}
             <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
-                <div className="flex items-center gap-2 sm:gap-3 lg:gap-8">
+                <div className="flex items-center gap-2 sm:gap-3 lg:gap-4 xl:gap-8">
 
                     {/* Mobile Hamburger Button */}
                     <button
@@ -57,12 +60,12 @@ export default function Header() {
                     </div>
 
                     {/* Desktop Search Bar */}
-                    <div className="hidden lg:block w-full max-w-[280px] xl:max-w-sm">
+                    <div className="hidden lg:block w-full max-w-[160px] xl:max-w-[220px]">
                         {settings.header.showSearch && <SearchBar compact={true} />}
                     </div>
 
                     {/* Desktop User Actions */}
-                    {/* <div className="hidden lg:flex items-center gap-3 shrink-0">
+                    <div className="hidden lg:flex items-center gap-3 shrink-0">
                         {session ? (
                             <div className="relative">
                                 <button
@@ -124,23 +127,15 @@ export default function Header() {
                                 )}
                             </div>
                         ) : (
-                            <>
-                                <Link 
-                                    href="/login" 
-                                    className="hidden xl:block text-sm font-bold hover:text-primary transition-colors px-4 py-2"
-                                >
-                                    Đăng nhập
-                                </Link>
-                                <Link 
-                                    href="/register" 
-                                    className="px-5 py-2.5 rounded-lg font-bold text-sm text-white transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0"
-                                    style={{ backgroundColor: primaryColor }}
-                                >
-                                    Đăng ký
-                                </Link>
-                            </>
+                            <button
+                                onClick={() => setIsLoginModalOpen(true)}
+                                className="px-5 py-2.5 rounded-lg font-bold text-sm text-white transition-all shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 active:translate-y-0"
+                                style={{ backgroundColor: primaryColor }}
+                            >
+                                Đăng nhập
+                            </button>
                         )}
-                    </div> */}
+                    </div>
                 </div>
             </div>
 
@@ -221,21 +216,16 @@ export default function Header() {
                                 ) : (
                                     <div className="flex flex-col gap-3">
                                         <p className="text-xs text-gray-500 font-bold uppercase tracking-widest mb-2 px-1">Tài khoản</p>
-                                        <Link 
-                                            href="/login" 
-                                            onClick={toggleMobileMenu}
-                                            className="w-full py-3.5 rounded-xl font-bold bg-white/5 border border-gray-800 text-center hover:bg-white/10 transition-colors"
-                                        >
-                                            Đăng nhập
-                                        </Link>
-                                        <Link 
-                                            href="/register" 
-                                            onClick={toggleMobileMenu}
+                                        <button
+                                            onClick={() => {
+                                                toggleMobileMenu();
+                                                setIsLoginModalOpen(true);
+                                            }}
                                             className="w-full py-3.5 rounded-xl font-bold text-white text-center shadow-lg shadow-primary/20 transition-transform active:scale-95"
                                             style={{ backgroundColor: primaryColor }}
                                         >
-                                            Đăng ký thành viên
-                                        </Link>
+                                            Đăng nhập
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -244,5 +234,9 @@ export default function Header() {
                 </div>
             )}
         </header>
+
+        {/* Login Modal — đặt ngoài header để tránh bị clip */}
+        <LoginModal isOpen={isLoginModalOpen} onClose={() => setIsLoginModalOpen(false)} />
+        </>
     );
 }

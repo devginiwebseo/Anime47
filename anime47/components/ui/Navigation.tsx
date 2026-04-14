@@ -133,9 +133,9 @@ export default function Navigation({
 
                             {/* Desktop Mega Menu - Styled to match Reference Image */}
                             {!isMobile && item.submenu && activeDropdown === index && (
-                                <div className="absolute top-full left-1/2 pt-4 z-50">
+                                <div className="absolute top-full left-1/2 -translate-x-1/2 pt-4 z-50">
                                     {/* The small triangle pointing up - centered and matching the border */}
-                                    <div className="absolute top-[11px] left-0 -translate-x-1/2 w-3.5 h-3.5 bg-[#0b1016] border-t border-l border-primary/50 rotate-45 z-[51]"></div>
+                                    <div className="absolute top-[11px] left-1/2 -translate-x-1/2 w-3.5 h-3.5 bg-[#0b1016] border-t border-l border-primary/50 rotate-45 z-[51]"></div>
 
                                     <div
                                         className="relative w-[650px] bg-[#0b1016] border border-primary/50 rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.8)] p-8 animate-fadeIn"

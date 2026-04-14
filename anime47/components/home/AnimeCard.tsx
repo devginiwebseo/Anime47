@@ -27,6 +27,7 @@ interface AnimeCardProps {
     cast?: string;
     duration?: string;
     language?: string;
+    isScheduleCard?: boolean;
 }
 
 export default function AnimeCard({
@@ -50,6 +51,7 @@ export default function AnimeCard({
     cast,
     duration,
     language,
+    isScheduleCard = false,
 }: AnimeCardProps) {
     // Có ít nhất 1 tập → đang chiếu; không có tập nào → sắp chiếu
     const hasEpisodes = currentEpisode != null && currentEpisode > 0;
@@ -127,8 +129,8 @@ export default function AnimeCard({
 
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
 
-                        {/* Upcoming Overlay — chỉ hiện khi chưa có tập nào */}
-                        {!hasEpisodes && (
+                        {/* Upcoming Overlay — chỉ hiện trong Lịch Chiếu khi chưa có tập nào */}
+                        {isScheduleCard && !hasEpisodes && (
                             <div className="absolute inset-0 bg-black/30 flex flex-col items-center justify-center p-4 pointer-events-none z-10 transition-all duration-300 group-hover:opacity-0 group-hover:scale-110">
                                 <div className="text-4xl md:text-5xl font-[1000] text-white/80 leading-none drop-shadow-[0_4px_8px_rgba(0,0,0,0.8)] tracking-tighter italic">
                                     {year || new Date().getFullYear()}
@@ -152,12 +154,14 @@ export default function AnimeCard({
                             )}
                         </div>
 
-                        {/* Bottom Status Bar */}
-                        <div className="absolute bottom-0 left-0 right-0 z-30">
-                            <div className="bg-primary text-white text-center py-2 text-[11px] font-black tracking-[0.2em] uppercase shadow-[0_-4px_12px_rgba(0,0,0,0.5)] border-t border-white/10">
-                                {hasEpisodes ? 'ĐANG CHIẾU' : 'SẮP CHIẾU'}
+                        {/* Bottom Status Bar — chỉ hiện trong Lịch Chiếu */}
+                        {isScheduleCard && (
+                            <div className="absolute bottom-0 left-0 right-0 z-30">
+                                <div className="bg-primary text-white text-center py-2 text-[11px] font-black tracking-[0.2em] uppercase shadow-[0_-4px_12px_rgba(0,0,0,0.5)] border-t border-white/10">
+                                    {hasEpisodes ? 'ĐANG CHIẾU' : 'SẮP CHIẾU'}
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 

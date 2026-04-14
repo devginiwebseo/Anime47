@@ -1,5 +1,6 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { prisma } from "./prisma";
 import bcrypt from "bcryptjs";
@@ -12,6 +13,10 @@ export const authOptions: NextAuthOptions = {
   },
 
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID!,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+    }),
     CredentialsProvider({
       name: "credentials",
       credentials: {
@@ -45,10 +50,21 @@ export const authOptions: NextAuthOptions = {
   ],
 
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account }) {
       if (user) {
-        token.role = (user as any).role;
         token.id = user.id;
+        // Nếu login bằng credentials, role đã có
+        if ((user as any).role) {
+          token.role = (user as any).role;
+        }
+      }
+      // Với Google login: lấy role từ DB
+      if (account?.provider === 'google' && token.email) {
+        const dbUser = await prisma.user.findUnique({ where: { email: token.email } });
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.id = dbUser.id;
+        }
       }
       return token;
     },
