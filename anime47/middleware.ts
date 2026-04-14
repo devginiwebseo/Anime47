@@ -4,7 +4,7 @@ import { NextResponse } from "next/server";
 export default withAuth(
   function middleware(req) {
     const token = req.nextauth.token;
-    const isLoginPage = req.nextUrl.pathname === "/admin/login";
+    const isLoginPage = req.nextUrl.pathname === "/admin/login" || req.nextUrl.pathname === "/admin/login/";
 
     // Nếu đã login và cố gắng truy cập trang login thì redirect về dashboard
     if (isLoginPage && token?.role === "ADMIN") {
@@ -16,7 +16,7 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        const isLoginPage = req.nextUrl.pathname === "/admin/login";
+        const isLoginPage = req.nextUrl.pathname === "/admin/login" || req.nextUrl.pathname === "/admin/login/";
 
         // Cho phép truy cập trang login mà không cần token
         if (isLoginPage) {

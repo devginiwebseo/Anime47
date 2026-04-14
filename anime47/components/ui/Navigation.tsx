@@ -115,14 +115,14 @@ export default function Navigation({
 
                             {/* Mobile Submenu Inline */}
                             {isMobile && item.submenu && activeDropdown === index && (
-                                <div className="w-full bg-[#1c1d22] rounded-lg mt-2 mb-1 py-3 px-3 space-y-1 border border-gray-800 shadow-inner">
+                                <div className="w-full  rounded-lg mt-2 mb-1 py-3  space-y-1">
                                     <div className="flex flex-col gap-1">
                                         {item.submenu.map((subItem) => (
                                             <Link
                                                 key={subItem.label}
                                                 href={subItem.href}
                                                 onClick={onItemClick}
-                                                className={`px-4 py-2.5 bg-[#111216]/50 rounded transition-all duration-150 uppercase font-bold text-xs tracking-tight ${pathname === subItem.href ? 'text-primary' : 'text-gray-200 hover:text-primary'}`}
+                                                className={`px-4 py-2.5 bg-[#111216]/50 rounded transition-all duration-150 uppercase font-normal text-xs tracking-tight ${pathname === subItem.href ? 'text-primary' : 'text-gray-200 hover:text-primary'}`}
                                             >
                                                 {subItem.label}
                                             </Link>

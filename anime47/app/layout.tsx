@@ -3,29 +3,63 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import MainLayoutWrapper from '@/components/layout/MainLayoutWrapper'
 import { AuthProvider } from '@/components/providers/AuthProvider'
+import { SettingsProvider } from '@/components/providers/SettingsProvider'
 import { prisma } from '@/lib/prisma'
+import { SiteSettings } from '@/hooks/useSiteSettings'
 
 const inter = Inter({
     subsets: ['latin', 'vietnamese'],
     display: 'swap',
 })
 
-export async function generateMetadata(): Promise<Metadata> {
-    let isIndexed = false;
-    let siteTitle = 'Anime47 - Xem Anime Vietsub Online Miễn Phí';
-    let faviconUrl = '/favicon.ico';
-
-    try {
-        const themeSetting = await prisma.settings.findUnique({ where: { key: 'theme' } });
-        if (themeSetting && themeSetting.value) {
-            const val = themeSetting.value as any;
-            isIndexed = val.isIndexed ?? false;
-            if (val.siteTitle) siteTitle = val.siteTitle;
-            if (val.faviconUrl) faviconUrl = val.faviconUrl;
-        }
-    } catch (e) {
-        console.error(e);
+const defaultSettings: SiteSettings = {
+    header: {
+        siteName: 'Anime47',
+        logoUrl: '',
+        showSearch: true,
+        menuItems: [],
+        announcement: '',
+    },
+    footer: {
+        copyrightText: '',
+        description: '',
+        socialLinks: [],
+        footerLinks: [],
+        showBackToTop: true,
+    },
+    theme: {
+        primaryColor: '#d32f2f',
+        backgroundColor: '#111827',
+        isIndexed: false,
+        siteTitle: '',
     }
+};
+
+async function getSiteSettings(): Promise<SiteSettings> {
+    try {
+        const [headerSetting, footerSetting, themeSetting] = await Promise.all([
+            prisma.settings.findUnique({ where: { key: 'header' } }),
+            prisma.settings.findUnique({ where: { key: 'footer' } }),
+            prisma.settings.findUnique({ where: { key: 'theme' } })
+        ]);
+
+        return {
+            header: { ...defaultSettings.header, ...(headerSetting?.value as any || {}) },
+            footer: { ...defaultSettings.footer, ...(footerSetting?.value as any || {}) },
+            theme: { ...defaultSettings.theme, ...(themeSetting?.value as any || {}) },
+        };
+    } catch (error) {
+        return defaultSettings;
+    }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+    const settings = await getSiteSettings();
+    const { theme } = settings;
+    
+    const isIndexed = theme.isIndexed ?? false;
+    const siteTitle = theme.siteTitle || 'Anime47 - Xem Anime Vietsub Online Miễn Phí';
+    const faviconUrl = (theme as any).faviconUrl || '/favicon.ico';
 
     return {
         title: siteTitle,
@@ -51,19 +85,22 @@ export async function generateMetadata(): Promise<Metadata> {
     }
 }
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode
 }) {
+    const initialSettings = await getSiteSettings();
+
     return (
         <html lang="vi" suppressHydrationWarning>
             <body className={inter.className} suppressHydrationWarning>
-                <AuthProvider>
-                    <MainLayoutWrapper>{children}</MainLayoutWrapper>
-                </AuthProvider>
+                <SettingsProvider initialSettings={initialSettings}>
+                    <AuthProvider>
+                        <MainLayoutWrapper>{children}</MainLayoutWrapper>
+                    </AuthProvider>
+                </SettingsProvider>
             </body>
         </html>
     )
 }
-

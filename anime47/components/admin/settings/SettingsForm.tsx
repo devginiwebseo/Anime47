@@ -1,6 +1,19 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
+import { resolveImageUrl } from '@/lib/image-url';
+
+// Ảnh upload local (/upload/...) cần dùng path relative để serve từ chính server đang chạy,
+// không được gắn domain API master vào.
+function resolveAdminImageUrl(url?: string): string | undefined {
+    if (!url) return undefined;
+    const trimmed = url.trim();
+    if (!trimmed) return undefined;
+    // Ảnh upload local — giữ nguyên path relative
+    if (trimmed.startsWith('/upload/')) return trimmed;
+    // URL đầy đủ hoặc URL từ API master
+    return resolveImageUrl(trimmed);
+}
 
 interface SettingsFormProps {
     initialHeaderSettings: HeaderSettings;
@@ -78,9 +91,14 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
         }
     };
 
+    const logoInputRef = useRef<HTMLInputElement>(null);
+    const faviconInputRef = useRef<HTMLInputElement>(null);
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'favicon') => {
         const file = e.target.files?.[0];
         if (!file) return;
+        // Reset input value để có thể chọn lại cùng file
+        e.target.value = '';
 
         const formData = new FormData();
         formData.append('file', file);
@@ -93,15 +111,32 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
             const data = await res.json();
             if (data.url) {
                 if (type === 'logo') {
-                    setHeader({ ...header, logoUrl: data.url });
+                    setHeader(prev => ({ ...prev, logoUrl: data.url }));
                 } else {
-                    setTheme({ ...theme, faviconUrl: data.url });
+                    setTheme(prev => ({ ...prev, faviconUrl: data.url }));
                 }
             } else {
                 alert('Tải ảnh thất bại: ' + (data.error || 'Lỗi không xác định'));
             }
         } catch (error) {
             alert('Lỗi tải ảnh');
+        }
+    };
+
+    const handleImageRemove = async (type: 'logo' | 'favicon') => {
+        const currentUrl = type === 'logo' ? header.logoUrl : theme.faviconUrl;
+        // Attempt to delete file from server (chỉ xóa ảnh lưu local)
+        if (currentUrl && currentUrl.startsWith('/upload/')) {
+            try {
+                await fetch(`/api/upload?url=${encodeURIComponent(currentUrl)}`, { method: 'DELETE' });
+            } catch {
+                // Bỏ qua lỗi xóa file — vẫn clear URL
+            }
+        }
+        if (type === 'logo') {
+            setHeader(prev => ({ ...prev, logoUrl: '' }));
+        } else {
+            setTheme(prev => ({ ...prev, faviconUrl: '' }));
         }
     };
 
@@ -194,14 +229,47 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                             <label className={labelClass}>Logo URL</label>
                             <div className="flex gap-2 items-center">
                                 <input value={header.logoUrl} onChange={(e) => setHeader({ ...header, logoUrl: e.target.value })} className={inputClass} placeholder="https://..." />
-                                <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+                                <input
+                                    ref={logoInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleImageUpload(e, 'logo')}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => logoInputRef.current?.click()}
+                                    className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition"
+                                >
                                     Tải Ảnh
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'logo')} />
-                                </label>
+                                </button>
                             </div>
                             {header.logoUrl && (
-                                <div className="mt-2 bg-slate-100 border p-2 rounded w-fit">
-                                    <img src={header.logoUrl} alt="Logo" className="h-10 object-contain" />
+                                <div className="mt-2 flex items-center gap-3">
+                                    <div className="bg-slate-100 border p-2 rounded">
+                                        <img
+                                            src={resolveAdminImageUrl(header.logoUrl)}
+                                            alt="Logo"
+                                            className="h-10 object-contain"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3'; }}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => logoInputRef.current?.click()}
+                                            className="text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition"
+                                        >
+                                            🔄 Đổi ảnh
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleImageRemove('logo')}
+                                            className="text-xs text-red-500 hover:text-red-700 font-semibold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition"
+                                        >
+                                            🗑 Xóa ảnh
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
@@ -340,14 +408,47 @@ export default function SettingsForm({ initialHeaderSettings, initialFooterSetti
                             <label className={labelClass}>Favicon URL (Biểu tượng web)</label>
                             <div className="flex gap-2 items-center">
                                 <input value={theme.faviconUrl || ''} onChange={(e) => setTheme({ ...theme, faviconUrl: e.target.value })} className={inputClass} placeholder="https://.../favicon.ico" />
-                                <label className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition">
+                                <input
+                                    ref={faviconInputRef}
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={(e) => handleImageUpload(e, 'favicon')}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => faviconInputRef.current?.click()}
+                                    className="cursor-pointer bg-slate-200 hover:bg-slate-300 px-4 py-2.5 rounded-xl text-sm font-semibold whitespace-nowrap transition"
+                                >
                                     Tải Ảnh
-                                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImageUpload(e, 'favicon')} />
-                                </label>
+                                </button>
                             </div>
                             {theme.faviconUrl && (
-                                <div className="mt-2 bg-slate-50 border border-dashed p-2 rounded w-fit">
-                                    <img src={theme.faviconUrl} alt="Favicon" className="h-8 w-8 object-contain" />
+                                <div className="mt-2 flex items-center gap-3">
+                                    <div className="bg-slate-50 border border-dashed p-2 rounded">
+                                        <img
+                                            src={resolveAdminImageUrl(theme.faviconUrl)}
+                                            alt="Favicon"
+                                            className="h-8 w-8 object-contain"
+                                            onError={(e) => { (e.target as HTMLImageElement).style.opacity = '0.3'; }}
+                                        />
+                                    </div>
+                                    <div className="flex flex-col gap-1">
+                                        <button
+                                            type="button"
+                                            onClick={() => faviconInputRef.current?.click()}
+                                            className="text-xs text-blue-600 hover:text-blue-800 font-semibold bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition"
+                                        >
+                                            🔄 Đổi ảnh
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleImageRemove('favicon')}
+                                            className="text-xs text-red-500 hover:text-red-700 font-semibold bg-red-50 hover:bg-red-100 px-3 py-1.5 rounded-lg transition"
+                                        >
+                                            🗑 Xóa ảnh
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>

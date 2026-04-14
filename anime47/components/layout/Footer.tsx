@@ -1,10 +1,12 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
 import SocialLinks from '../ui/SocialLinks';
-import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useSettings } from '@/components/providers/SettingsProvider';
 
 export default function Footer() {
-    const { settings } = useSiteSettings();
+    const { settings } = useSettings();
 
     return (
         <footer className="border-t border-gray-800 text-white" style={{ backgroundColor: settings.theme.backgroundColor }}>

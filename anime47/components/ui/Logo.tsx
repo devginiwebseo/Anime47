@@ -1,17 +1,29 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { resolveImageUrl } from '@/lib/image-url';
 
 interface LogoProps {
     src?: string;
     compact?: boolean;
 }
 
+// Helper to resolve admin/local images
+function resolveLogoUrl(url?: string): string {
+    if (!url) return '/logo.png';
+    const trimmed = url.trim();
+    if (!trimmed) return '/logo.png';
+    if (trimmed.startsWith('/upload/')) return trimmed;
+    return resolveImageUrl(trimmed) || '/logo.png';
+}
+
 export default function Logo({ src, compact = false }: LogoProps) {
     const [error, setError] = React.useState(false);
 
-    // Only attempt to show image if src is provided and is not the known-missing default
-    const showImage = src && src !== '/logo.png' && !error;
+    const resolvedSrc = resolveLogoUrl(src);
+    const isDefault = resolvedSrc === '/logo.png';
+    const showImage = !isDefault && !error;
+
     const imageSizeClass = compact
         ? 'w-[112px] h-[40px] sm:w-[132px] sm:h-[46px] md:w-[160px] md:h-[56px]'
         : 'w-[132px] h-[48px] sm:w-[160px] sm:h-[60px] md:w-[200px] md:h-[80px]';
@@ -23,7 +35,7 @@ export default function Logo({ src, compact = false }: LogoProps) {
                 {showImage ? (
                     <div className={`relative ${imageSizeClass}`}>
                         <Image
-                            src={src!}
+                            src={resolvedSrc}
                             alt="Anime47"
                             fill
                             className="object-contain"
@@ -32,8 +44,8 @@ export default function Logo({ src, compact = false }: LogoProps) {
                         />
                     </div>
                 ) : (
-                    <span className={`${textSizeClass} font-black italic tracking-tighter text-white`}>
-                        ANIME<span className="text-primary font-bold">47</span>
+                    <span className={`${textSizeClass} font-black italic tracking-tighter text-white uppercase`}>
+                        ANIME<span className="text-primary font-bold">EZ</span>
                     </span>
                 )}
             </div>

@@ -15,9 +15,8 @@ export default async function CountryDetailPage(props: {
     const currentPage = parseInt(searchParams.page || '1');
     const limit = 20;
 
-    const apiUrl = process.env.API_URL || 'https://anime.datatruyen.online';
-    const res = await fetch(
-        `${apiUrl}/api/public/countries?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
+    const res = await fetchExternalApi(
+        `/api/public/countries?slug=${encodeURIComponent(slug)}&limit=${limit}&page=${currentPage}`,
         { next: { revalidate: 60 } }
     );
 

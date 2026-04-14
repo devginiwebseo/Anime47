@@ -4,11 +4,10 @@ import React, { useState } from 'react';
 import SearchBar from '../ui/SearchBar';
 import Logo from '../ui/Logo';
 import Navigation from '../ui/Navigation';
-
-import { useSiteSettings } from '@/hooks/useSiteSettings';
+import { useSettings } from '@/components/providers/SettingsProvider';
 
 export default function Header() {
-    const { settings } = useSiteSettings();
+    const { settings } = useSettings();
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
